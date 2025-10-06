@@ -54,20 +54,12 @@
   }
   .animate-marquee-content {
       animation: marquee 15s linear infinite;
-      animation-play-state: paused;
+      animation-play-state: running; /* Play by default */
   }
-  /* Default hover-to-play behavior */
-  .animate-marquee-container:not(.autoplay):hover .animate-marquee-content,
-  .animate-marquee-container:not(.autoplay):focus-within .animate-marquee-content {
-      animation-play-state: running;
-  }
-  
-  /* Autoplay behavior with pause on hover */
-  .animate-marquee-container.autoplay .animate-marquee-content {
-      animation-play-state: running;
-  }
-  .animate-marquee-container.autoplay:hover .animate-marquee-content,
-  .animate-marquee-container.autoplay:focus-within .animate-marquee-content {
+
+  /* Pause any marquee on hover or focus */
+  .animate-marquee-container:hover .animate-marquee-content,
+  .animate-marquee-container:focus-within .animate-marquee-content {
       animation-play-state: paused;
   }
   .will-change-transform {
@@ -182,6 +174,7 @@
 </head>
   <body>
     <div id="root"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>

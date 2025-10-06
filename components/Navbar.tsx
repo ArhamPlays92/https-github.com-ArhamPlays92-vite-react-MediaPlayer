@@ -4,7 +4,6 @@ import BrowseIcon from './icons/BrowseIcon';
 import AudioIcon from './icons/AudioIcon';
 import VideoIcon from './icons/VideoIcon';
 import PlaylistIcon from './icons/PlaylistIcon';
-import MicIcon from './icons/MicIcon';
 
 interface NavbarProps {
   currentView: View;
@@ -45,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, isExpanded, onMou
     <aside 
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className={`fixed top-20 left-0 h-[calc(100vh-5rem)] z-10 hidden lg:flex flex-col p-2 space-y-2 transition-all duration-300 ease-in-out ${isExpanded ? 'w-60' : 'w-20'}`}
+      className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] z-10 hidden lg:flex flex-col p-2 space-y-2 transition-all duration-300 ease-in-out ${isExpanded ? 'w-60' : 'w-20'}`}
     >
       <NavButton 
         label="Audio" 
@@ -73,13 +72,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, isExpanded, onMou
         isActive={currentView === View.PLAYLIST} 
         onClick={() => setView(View.PLAYLIST)}
         icon={<PlaylistIcon />}
-        isExpanded={isExpanded}
-      />
-      <NavButton 
-        label="Transcribe" 
-        isActive={currentView === View.TRANSCRIBE} 
-        onClick={() => setView(View.TRANSCRIBE)}
-        icon={<MicIcon />}
         isExpanded={isExpanded}
       />
     </aside>

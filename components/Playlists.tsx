@@ -23,7 +23,6 @@ interface PlaylistsProps {
   onAddToPlaylist: (mediaId: number, playlistId: number) => void;
   onAddToQueue?: (item: MediaItem) => void;
   onRemoveFromPlaylist: (mediaId: number, playlistId: number) => void;
-  onRemoveLocalFile: (mediaId: number) => void;
   initialSelectedPlaylist: Playlist | null;
   onBackToPlaylists: () => void;
 }
@@ -83,7 +82,6 @@ const Playlists: React.FC<PlaylistsProps> = ({
     onAddToPlaylist,
     onAddToQueue,
     onRemoveFromPlaylist,
-    onRemoveLocalFile,
     initialSelectedPlaylist,
     onBackToPlaylists
 }) => {
@@ -140,7 +138,6 @@ const Playlists: React.FC<PlaylistsProps> = ({
           playlists={playlists}
           onAddToPlaylist={onAddToPlaylist}
           onAddToQueue={onAddToQueue}
-          onRemoveLocalFile={onRemoveLocalFile}
           onRemoveFromPlaylist={(mediaId: number) => onRemoveFromPlaylist(mediaId, selectedPlaylist.id)}
           playlistContextId={selectedPlaylist.id}
         />
@@ -151,7 +148,7 @@ const Playlists: React.FC<PlaylistsProps> = ({
   return (
     <div>
       <h2 className="text-3xl font-bold mb-6 text-gray-200">Playlists</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <CreatePlaylistCard onCreate={onCreatePlaylist} />
         {playlists.map(playlist => {
           const isLikedPlaylist = playlist.id === LIKED_SONGS_PLAYLIST_ID;

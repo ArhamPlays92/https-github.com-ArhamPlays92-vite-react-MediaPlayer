@@ -4,7 +4,6 @@ import BrowseIcon from './icons/BrowseIcon';
 import AudioIcon from './icons/AudioIcon';
 import VideoIcon from './icons/VideoIcon';
 import PlaylistIcon from './icons/PlaylistIcon';
-import MicIcon from './icons/MicIcon';
 
 interface MobileNavbarProps {
   currentView: View;
@@ -56,12 +55,6 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({ currentView, setView }) => 
         isActive={currentView === View.PLAYLIST}
         onClick={() => setView(View.PLAYLIST)}
         icon={<PlaylistIcon />}
-      />
-      <MobileNavButton
-        label="Transcribe"
-        isActive={currentView === View.TRANSCRIBE}
-        onClick={() => setView(View.TRANSCRIBE)}
-        icon={<MicIcon />}
       />
     </nav>
   );

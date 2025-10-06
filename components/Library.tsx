@@ -15,7 +15,6 @@ interface LibraryProps {
   playlists: Playlist[];
   onAddToPlaylist: (mediaId: number, playlistId: number) => void;
   onAddToQueue?: (item: MediaItem) => void;
-  onRemoveLocalFile?: (mediaId: number) => void;
   onRemoveFromPlaylist?: (mediaId: number, playlistId: number) => void;
   playlistContextId?: number;
 }
@@ -29,7 +28,6 @@ const Library: React.FC<LibraryProps> = ({
   playlists, 
   onAddToPlaylist,
   onAddToQueue,
-  onRemoveLocalFile,
   onRemoveFromPlaylist,
   playlistContextId,
 }) => {
@@ -55,7 +53,7 @@ const Library: React.FC<LibraryProps> = ({
         {/* Mobile view (respects toggle) */}
         <div className="md:hidden">
           {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {filteredMedia.map((item) => (
                 <LibraryCard 
                   key={item.id} 
@@ -64,7 +62,6 @@ const Library: React.FC<LibraryProps> = ({
                   playlists={playlists}
                   onAddToPlaylist={onAddToPlaylist}
                   onAddToQueue={onAddToQueue}
-                  onRemoveLocalFile={onRemoveLocalFile}
                   onRemoveFromPlaylist={onRemoveFromPlaylist}
                   contextPlaylistId={playlistContextId}
                 />
@@ -80,7 +77,6 @@ const Library: React.FC<LibraryProps> = ({
                   playlists={playlists}
                   onAddToPlaylist={onAddToPlaylist}
                   onAddToQueue={onAddToQueue}
-                  onRemoveLocalFile={onRemoveLocalFile}
                   onRemoveFromPlaylist={onRemoveFromPlaylist}
                   contextPlaylistId={playlistContextId}
                 />
@@ -90,7 +86,7 @@ const Library: React.FC<LibraryProps> = ({
         </div>
 
         {/* Desktop view (always grid) */}
-        <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredMedia.map((item) => (
             <LibraryCard 
               key={item.id} 
@@ -99,7 +95,6 @@ const Library: React.FC<LibraryProps> = ({
               playlists={playlists}
               onAddToPlaylist={onAddToPlaylist}
               onAddToQueue={onAddToQueue}
-              onRemoveLocalFile={onRemoveLocalFile}
               onRemoveFromPlaylist={onRemoveFromPlaylist}
               contextPlaylistId={playlistContextId}
             />

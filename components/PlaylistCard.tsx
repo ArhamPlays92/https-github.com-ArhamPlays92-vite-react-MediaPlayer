@@ -103,7 +103,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, allMedia, onClick
                 <div className="absolute top-2 right-2" ref={menuRef}>
                     <button 
                         onClick={handleMenuToggle} 
-                        className="p-1.5 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-200 hover:bg-black/75 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                        className="p-1.5 bg-black/50 rounded-full opacity-70 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-200 hover:bg-black/75 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                         aria-label="Playlist options"
                     >
                         <MoreVerticalIcon className="w-5 h-5 text-white" />

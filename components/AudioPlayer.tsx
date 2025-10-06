@@ -357,7 +357,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                                                 ) : (
                                                     <button 
                                                         onClick={() => onRemoveFromQueue(item.id)} 
-                                                        className="p-1 text-gray-500 hover:text-white focus:text-white opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity rounded-full hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50"
+                                                        className="p-1 text-gray-500 hover:text-white focus:text-white opacity-70 group-hover:opacity-100 focus:opacity-100 transition-opacity rounded-full hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50"
                                                         aria-label={`Remove ${item.title} from queue`}
                                                     >
                                                         <TrashIcon className="w-4 h-4" />

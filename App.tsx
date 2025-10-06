@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import Header from './components/Header';
 import Library from './components/Library';
@@ -11,7 +12,6 @@ import Playlists from './components/Playlists';
 import ConfirmationModal from './components/ConfirmationModal';
 import SearchView from './components/SearchView';
 import MiniPlayer from './components/MiniPlayer';
-import Transcribe from './components/Transcribe';
 import OpeningAnimation from './components/OpeningAnimation';
 import AlbumView from './components/AlbumView';
 import ArtistView from './components/ArtistView';
@@ -50,6 +50,18 @@ function App() {
   });
   const [isScrolled, setIsScrolled] = useState(false);
   
+  const requestConfirmation = useCallback((title: string, message: string, onConfirm: () => void) => {
+    setConfirmationModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm: () => {
+        onConfirm();
+        setConfirmationModal(prev => ({ ...prev, isOpen: false }));
+      },
+    });
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
         setIsLoading(false);
@@ -216,28 +228,15 @@ function App() {
   };
 
 
-  const handleAddLocalFiles = (newFiles: MediaItem[]) => {
+  const handleSetLocalFiles = (newFiles: MediaItem[]) => {
     setLocalMediaFiles(prevFiles => {
-      const existingSrcs = new Set(prevFiles.map(f => f.src));
-      const uniqueNewFiles = newFiles.filter(f => !existingSrcs.has(f.src));
-      return [...prevFiles, ...uniqueNewFiles];
-    });
-  };
-
-  const handleRemoveLocalFile = (mediaId: number) => {
-     setConfirmationModal({
-      isOpen: true,
-      title: "Remove File",
-      message: "Are you sure you want to permanently remove this file from your library? This action will also remove it from all playlists.",
-      onConfirm: () => {
-        player.removeFromQueue(mediaId);
-        setLocalMediaFiles(prev => prev.filter(file => file.id !== mediaId));
-        setPlaylists(prev => prev.map(p => ({
-            ...p,
-            mediaIds: p.mediaIds.filter(id => id !== mediaId)
-        })));
-        setConfirmationModal({ ...confirmationModal, isOpen: false });
-      },
+      // Revoke old blob URLs to prevent memory leaks
+      prevFiles.forEach(file => {
+        if (file.src.startsWith('blob:')) {
+          URL.revokeObjectURL(file.src);
+        }
+      });
+      return newFiles;
     });
   };
 
@@ -306,12 +305,19 @@ function App() {
   }
 
   const renderContent = () => {
+    const mainContentWrapper = (content: React.ReactNode) => {
+      const isLibraryView = (currentView === View.AUDIO || currentView === View.VIDEO) && !selectedAlbum && !selectedArtist && !searchQuery;
+      // The library view handles its own padding to allow the tab bar border to be full-width.
+      // Other views get padding from this wrapper.
+      return <div className={isLibraryView ? '' : 'p-4'}>{content}</div>;
+    };
+
     if (selectedMedia && selectedMedia.type === MediaType.VIDEO) {
-      return <VideoPlayer media={selectedMedia} onBack={handleBackFromVideo} />;
+      return mainContentWrapper(<VideoPlayer media={selectedMedia} onBack={handleBackFromVideo} />);
     }
 
     if (searchQuery) {
-      return <SearchView 
+      return mainContentWrapper(<SearchView 
         searchQuery={searchQuery}
         allMedia={allMedia}
         playlists={playlists}
@@ -319,14 +325,14 @@ function App() {
         onSelectPlaylist={handleSelectPlaylist}
         onAddToPlaylist={handleAddToPlaylist}
         onAddToQueue={player.addToQueue}
-        onRemoveLocalFile={handleRemoveLocalFile}
-      />
+      />);
     }
 
+    let viewContent: React.ReactNode;
     switch (currentView) {
       case View.AUDIO:
         if (selectedAlbum) {
-          return <AlbumView 
+          viewContent = <AlbumView 
             album={selectedAlbum} 
             onBack={handleBackToLibrary}
             onSelectMedia={handleSelectMedia}
@@ -334,34 +340,34 @@ function App() {
             onAddToQueue={player.addToQueue}
             playlists={playlists}
           />
-        }
-        if (selectedArtist) {
-            return <ArtistView 
+        } else if (selectedArtist) {
+            viewContent = <ArtistView 
               artist={selectedArtist}
               onBack={handleBackToLibrary}
               onSelectAlbum={handleSelectAlbum}
             />
+        } else {
+          viewContent = <MediaLibraryView 
+              mediaType={MediaType.AUDIO}
+              allMediaForType={allAudioFiles}
+              albums={audioAlbums}
+              artists={audioArtists}
+              activeSubView={audioLibrarySubView}
+              onSetSubView={setAudioLibrarySubView}
+              onSelectAlbum={handleSelectAlbum}
+              onSelectArtist={handleSelectArtist}
+              onSelectMedia={handleSelectMedia}
+              viewMode={libraryViewMode}
+              setViewMode={setLibraryViewMode}
+              playlists={playlists}
+              onAddToPlaylist={handleAddToPlaylist}
+              onAddToQueue={player.addToQueue}
+          />
         }
-        return <MediaLibraryView 
-            mediaType={MediaType.AUDIO}
-            allMediaForType={allAudioFiles}
-            albums={audioAlbums}
-            artists={audioArtists}
-            activeSubView={audioLibrarySubView}
-            onSetSubView={setAudioLibrarySubView}
-            onSelectAlbum={handleSelectAlbum}
-            onSelectArtist={handleSelectArtist}
-            onSelectMedia={handleSelectMedia}
-            viewMode={libraryViewMode}
-            setViewMode={setLibraryViewMode}
-            playlists={playlists}
-            onAddToPlaylist={handleAddToPlaylist}
-            onAddToQueue={player.addToQueue}
-            onRemoveLocalFile={handleRemoveLocalFile}
-        />;
+        break;
       case View.VIDEO:
         if (selectedAlbum) {
-          return <AlbumView 
+          viewContent = <AlbumView 
             album={selectedAlbum} 
             onBack={handleBackToLibrary}
             onSelectMedia={handleSelectMedia}
@@ -369,33 +375,33 @@ function App() {
             onAddToQueue={player.addToQueue}
             playlists={playlists}
           />
-        }
-        if (selectedArtist) {
-            return <ArtistView 
+        } else if (selectedArtist) {
+            viewContent = <ArtistView 
               artist={selectedArtist}
               onBack={handleBackToLibrary}
               onSelectAlbum={handleSelectAlbum}
             />
+        } else {
+          viewContent = <MediaLibraryView
+              mediaType={MediaType.VIDEO}
+              allMediaForType={allVideoFiles}
+              albums={videoAlbums}
+              artists={videoArtists}
+              activeSubView={videoLibrarySubView}
+              onSetSubView={setVideoLibrarySubView}
+              onSelectAlbum={handleSelectAlbum}
+              onSelectArtist={handleSelectArtist}
+              onSelectMedia={handleSelectMedia}
+              viewMode={libraryViewMode}
+              setViewMode={setLibraryViewMode}
+              playlists={playlists}
+              onAddToPlaylist={handleAddToPlaylist}
+              onAddToQueue={player.addToQueue}
+          />
         }
-        return <MediaLibraryView
-            mediaType={MediaType.VIDEO}
-            allMediaForType={allVideoFiles}
-            albums={videoAlbums}
-            artists={videoArtists}
-            activeSubView={videoLibrarySubView}
-            onSetSubView={setVideoLibrarySubView}
-            onSelectAlbum={handleSelectAlbum}
-            onSelectArtist={handleSelectArtist}
-            onSelectMedia={handleSelectMedia}
-            viewMode={libraryViewMode}
-            setViewMode={setLibraryViewMode}
-            playlists={playlists}
-            onAddToPlaylist={handleAddToPlaylist}
-            onAddToQueue={player.addToQueue}
-            onRemoveLocalFile={handleRemoveLocalFile}
-        />;
+        break;
       case View.PLAYLIST:
-        return <Playlists
+        viewContent = <Playlists
           playlists={playlists}
           onCreatePlaylist={handleCreatePlaylist}
           onDeletePlaylist={handleDeletePlaylist}
@@ -407,27 +413,23 @@ function App() {
           onAddToPlaylist={handleAddToPlaylist}
           onAddToQueue={player.addToQueue}
           onRemoveFromPlaylist={handleRemoveFromPlaylist}
-          onRemoveLocalFile={handleRemoveLocalFile}
           initialSelectedPlaylist={activePlaylist}
           onBackToPlaylists={handleBackToPlaylists}
         />;
-      case View.TRANSCRIBE:
-        return <Transcribe />;
+        break;
       case View.BROWSE:
       default:
-        return <Browse 
-          onFilesAdded={handleAddLocalFiles} 
-          localMediaFiles={localMediaFiles}
+        viewContent = <Browse 
+          onLibraryScanned={handleSetLocalFiles} 
           onSelectMedia={handleSelectMedia}
-          viewMode={libraryViewMode}
-          setViewMode={setLibraryViewMode}
-          playlists={playlists}
-          onAddToPlaylist={handleAddToPlaylist}
           onAddToQueue={player.addToQueue}
-          onRemoveLocalFile={handleRemoveLocalFile}
-          onRemoveFromPlaylist={handleRemoveFromPlaylist}
+          onAddToPlaylist={handleAddToPlaylist}
+          playlists={playlists}
+          requestConfirmation={requestConfirmation}
         />;
+        break;
     }
+    return mainContentWrapper(viewContent);
   };
 
   const mainPaddingBottom = player.audioPlayerState !== 'hidden' 
@@ -454,7 +456,7 @@ function App() {
         currentView={currentView} 
         setView={handleSetView} 
       />
-      <main className={`pt-24 p-4 transition-all duration-300 ease-in-out ${isSidebarExpanded ? 'lg:pl-64' : 'lg:pl-24'} ${mainPaddingBottom}`}>
+      <main className={`pt-14 transition-all duration-300 ease-in-out ${isSidebarExpanded ? 'lg:pl-64' : 'lg:pl-24'} ${mainPaddingBottom}`}>
         {renderContent()}
       </main>
 

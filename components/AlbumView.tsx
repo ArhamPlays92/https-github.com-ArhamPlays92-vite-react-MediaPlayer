@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Album, MediaItem, Playlist } from '../types';
 import ChevronLeftIcon from './icons/ChevronLeftIcon';
@@ -31,11 +32,11 @@ const AlbumView: React.FC<AlbumViewProps> = ({
                 <ChevronLeftIcon className="w-5 h-5" />
                 <span>Back to Library</span>
             </button>
-            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 mb-8">
+            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 mb-6">
                 <img 
                     src={album.coverArt} 
                     alt={album.title} 
-                    className="w-32 h-32 md:w-48 md:h-48 flex-shrink-0 rounded-lg shadow-lg border border-gray-800" 
+                    className="w-28 h-28 md:w-40 md:h-40 flex-shrink-0 rounded-lg shadow-lg border border-gray-800" 
                 />
                 <div className="text-center sm:text-left min-w-0">
                     <p className="text-sm font-bold text-gray-300 uppercase tracking-wider">Album</p>

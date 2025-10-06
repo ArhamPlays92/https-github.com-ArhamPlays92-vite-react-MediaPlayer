@@ -1,6 +1,7 @@
 
 
 
+
 import React from 'react';
 import { MediaItem, Playlist, MediaType } from '../types';
 import LibraryListItem from './LibraryListItem';
@@ -16,7 +17,6 @@ interface SearchViewProps {
     onSelectPlaylist: (playlist: Playlist) => void;
     onAddToPlaylist: (mediaId: number, playlistId: number) => void;
     onAddToQueue?: (item: MediaItem) => void;
-    onRemoveLocalFile: (mediaId: number) => void;
 }
 
 const SearchView: React.FC<SearchViewProps> = ({
@@ -27,7 +27,6 @@ const SearchView: React.FC<SearchViewProps> = ({
     onSelectPlaylist,
     onAddToPlaylist,
     onAddToQueue,
-    onRemoveLocalFile
 }) => {
     const lowerCaseQuery = searchQuery.toLowerCase();
 
@@ -58,7 +57,7 @@ const SearchView: React.FC<SearchViewProps> = ({
             {videoResults.length > 0 && (
                 <section className="mb-10">
                     <h3 className="text-2xl font-semibold mb-4 text-gray-300">Videos</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {videoResults.map(item => (
                             <LibraryCard
                                 key={item.id}
@@ -67,7 +66,6 @@ const SearchView: React.FC<SearchViewProps> = ({
                                 playlists={allPlaylists}
                                 onAddToPlaylist={onAddToPlaylist}
                                 onAddToQueue={onAddToQueue}
-                                onRemoveLocalFile={onRemoveLocalFile}
                             />
                         ))}
                     </div>
@@ -77,7 +75,7 @@ const SearchView: React.FC<SearchViewProps> = ({
             {playlistResults.length > 0 && (
                 <section className="mb-10">
                     <h3 className="text-2xl font-semibold mb-4 text-gray-300">Playlists</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {playlistResults.map(playlist => (
                             <PlaylistCard
                                 key={playlist.id}
@@ -102,7 +100,6 @@ const SearchView: React.FC<SearchViewProps> = ({
                                 playlists={allPlaylists}
                                 onAddToPlaylist={onAddToPlaylist}
                                 onAddToQueue={onAddToQueue}
-                                onRemoveLocalFile={onRemoveLocalFile}
                             />
                         ))}
                     </div>

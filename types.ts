@@ -36,7 +36,6 @@ export enum View {
   AUDIO = 'audio',
   VIDEO = 'video',
   PLAYLIST = 'playlist',
-  TRANSCRIBE = 'transcribe',
 }
 
 export interface Playlist {

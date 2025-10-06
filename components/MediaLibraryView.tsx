@@ -1,5 +1,7 @@
 
 
+
+
 import React from 'react';
 import { MediaItem, Album, Artist, LibrarySubView, MediaType, LibraryViewMode, Playlist } from '../types';
 import Library from './Library';
@@ -44,7 +46,6 @@ interface MediaLibraryViewProps {
   playlists: Playlist[];
   onAddToPlaylist: (mediaId: number, playlistId: number) => void;
   onAddToQueue?: (item: MediaItem) => void;
-  onRemoveLocalFile?: (mediaId: number) => void;
 }
 
 const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
@@ -62,7 +63,6 @@ const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
   playlists,
   onAddToPlaylist,
   onAddToQueue,
-  onRemoveLocalFile,
 }) => {
   
   const renderContent = () => {
@@ -99,7 +99,6 @@ const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
                       playlists={playlists}
                       onAddToPlaylist={onAddToPlaylist}
                       onAddToQueue={onAddToQueue}
-                      onRemoveLocalFile={onRemoveLocalFile}
                   />
               );
       }
@@ -107,12 +106,12 @@ const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
 
   return (
       <div>
-          <div className="flex items-center space-x-2 mb-6 border-b border-gray-800" role="tablist" aria-label="Library view">
+          <div className="flex items-center space-x-2 border-b border-gray-800 px-4" role="tablist" aria-label="Library view">
               <TabButton label="All" isActive={activeSubView === 'all'} onClick={() => onSetSubView('all')} />
               <TabButton label="Albums" isActive={activeSubView === 'albums'} onClick={() => onSetSubView('albums')} />
               <TabButton label="Artists" isActive={activeSubView === 'artists'} onClick={() => onSetSubView('artists')} />
           </div>
-          <div role="tabpanel">
+          <div role="tabpanel" className="px-4 pt-4">
             {renderContent()}
           </div>
       </div>

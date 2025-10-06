@@ -23,7 +23,7 @@ const PlaylistMenu: React.FC<PlaylistMenuProps> = ({ onClose, onRename, onDelete
     };
 
     return (
-        <div className="absolute right-0 top-full mt-2 w-40 bg-black/50 backdrop-blur-lg border border-white/10 rounded-md shadow-lg z-30">
+        <div className="absolute right-0 top-full mt-2 w-40 bg-gray-900 border border-gray-800 rounded-md shadow-lg z-30">
             <div className="p-1">
                 <button
                     onClick={handleRename}

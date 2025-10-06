@@ -64,8 +64,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek
         : "w-full h-1.5 bg-white/20 rounded-full relative";
 
     const thumbClasses = size === 'small'
-        ? "absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full transform translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
-        : "absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full transform translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity";
+        ? "absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full transform translate-x-1/2 opacity-100 transition-opacity"
+        : "absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full transform translate-x-1/2 opacity-100 transition-opacity";
 
 
     return (

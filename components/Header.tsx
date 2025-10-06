@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import SearchIcon from './icons/SearchIcon';
 import CloseIcon from './icons/CloseIcon';
@@ -20,12 +21,12 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, isScrolled
     : 'border-b border-transparent';
 
   return (
-    <header className={`p-4 sticky w-full top-0 z-20 h-20 flex items-center transition-all duration-300 ${scrolledClasses}`}>
+    <header className={`px-4 py-2 sticky w-full top-0 z-20 h-14 flex items-center transition-all duration-300 ${scrolledClasses}`}>
       <div className="container mx-auto flex justify-between items-center gap-4">
         {/* Title/Logo */}
         <div className={`flex items-center space-x-3 ${isMobileSearchActive ? 'hidden' : 'flex'}`}>
-          <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"></path></svg>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-200 tracking-tight">Media Player</h1>
+          <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"></path></svg>
+          <h1 className="text-base md:text-lg font-bold text-gray-200 tracking-tight">Media Player</h1>
         </div>
 
         {/* Desktop Search Bar */}

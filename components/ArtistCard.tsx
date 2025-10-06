@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Artist } from '../types';
 import Marquee from './Marquee';
@@ -21,7 +22,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, onClick }) => {
                     className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" 
                 />
             </div>
-            <div className="pt-4 w-full">
+            <div className="pt-3 w-full">
                 <Marquee as="h3" text={artist.name} className="text-base font-semibold text-gray-200 group-hover:text-white transition-colors" />
             </div>
         </div>

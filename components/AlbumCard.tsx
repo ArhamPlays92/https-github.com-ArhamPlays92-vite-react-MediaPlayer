@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Album } from '../types';
 import Marquee from './Marquee';
@@ -26,7 +27,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onClick }) => {
                     </div>
                 </div>
             </div>
-            <div className="pt-4">
+            <div className="pt-3">
                 <Marquee as="h3" text={album.title} className="text-base font-semibold text-gray-200 group-hover:text-white transition-colors" />
                 <Marquee as="p" text={album.artist} className="text-sm text-gray-400" />
             </div>
