@@ -45,7 +45,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, isExpanded, onMou
     <aside 
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className={`fixed top-20 left-0 h-[calc(100vh-5rem)] z-10 bg-black/50 backdrop-blur-lg border-r border-gray-800 hidden md:flex flex-col p-2 space-y-2 transition-all duration-300 ease-in-out ${isExpanded ? 'w-60' : 'w-20'}`}
+      className={`fixed top-20 left-0 h-[calc(100vh-5rem)] z-10 hidden lg:flex flex-col p-2 space-y-2 transition-all duration-300 ease-in-out ${isExpanded ? 'w-60' : 'w-20'}`}
     >
       <NavButton 
         label="Audio" 

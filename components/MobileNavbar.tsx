@@ -17,7 +17,7 @@ const MobileNavButton: React.FC<{
   onClick: () => void;
   icon: React.ReactNode;
 }> = ({ label, isActive, onClick, icon }) => {
-  const activeClasses = isActive ? 'text-white' : 'text-gray-500';
+  const activeClasses = isActive ? 'text-white' : 'text-gray-400';
 
   return (
     <button
@@ -32,7 +32,7 @@ const MobileNavButton: React.FC<{
 
 const MobileNavbar: React.FC<MobileNavbarProps> = ({ currentView, setView }) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-16 z-20 bg-black/50 backdrop-blur-lg border-t border-gray-800 flex justify-around items-center md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 h-16 z-20 bg-black/75 backdrop-blur-xl border-t border-white/10 flex justify-around items-center lg:hidden">
       <MobileNavButton
         label="Audio"
         isActive={currentView === View.AUDIO}

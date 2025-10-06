@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import SearchIcon from './icons/SearchIcon';
 import CloseIcon from './icons/CloseIcon';

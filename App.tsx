@@ -1,4 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+
+
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import Header from './components/Header';
 import Library from './components/Library';
 import AudioPlayer from './components/AudioPlayer';
@@ -11,8 +13,12 @@ import ConfirmationModal from './components/ConfirmationModal';
 import SearchView from './components/SearchView';
 import MiniPlayer from './components/MiniPlayer';
 import Transcribe from './components/Transcribe';
+import OpeningAnimation from './components/OpeningAnimation';
+import AlbumView from './components/AlbumView';
+import ArtistView from './components/ArtistView';
+import MediaLibraryView from './components/MediaLibraryView';
 import { MEDIA_FILES, INITIAL_PLAYLISTS, LIKED_SONGS_PLAYLIST_ID } from './constants';
-import { MediaItem, View, MediaType, LibraryViewMode, Playlist } from './types';
+import { MediaItem, View, MediaType, LibraryViewMode, Playlist, Album, Artist, LibrarySubView } from './types';
 import { useAudioPlayer } from './hooks/useAudioPlayer';
 
 type ConfirmationState = {
@@ -23,6 +29,7 @@ type ConfirmationState = {
 }
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState<View>(View.AUDIO);
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const [localMediaFiles, setLocalMediaFiles] = useState<MediaItem[]>([]);
@@ -31,8 +38,11 @@ function App() {
   const [playlists, setPlaylists] = useState<Playlist[]>(INITIAL_PLAYLISTS);
   const [searchQuery, setSearchQuery] = useState('');
   const [activePlaylist, setActivePlaylist] = useState<Playlist | null>(null);
-  const [selectedAudioCategory, setSelectedAudioCategory] = useState<string>('All');
-  const [selectedVideoCategory, setSelectedVideoCategory] = useState<string>('All');
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [audioLibrarySubView, setAudioLibrarySubView] = useState<LibrarySubView>('albums');
+  const [videoLibrarySubView, setVideoLibrarySubView] = useState<LibrarySubView>('all');
+
   const [confirmationModal, setConfirmationModal] = useState<ConfirmationState>({
     isOpen: false,
     title: '',
@@ -40,28 +50,111 @@ function App() {
     onConfirm: () => {},
   });
   const [isScrolled, setIsScrolled] = useState(false);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        setIsLoading(false);
+    }, 2200);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
-      // A small threshold to prevent firing on minimal scroll
       setIsScrolled(window.scrollY > 10);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Initial check in case the page loads scrolled
     handleScroll();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
   const player = useAudioPlayer();
-  
+  const allMedia = useMemo(() => [...MEDIA_FILES, ...localMediaFiles], [localMediaFiles]);
+  const allAudioFiles = useMemo(() => allMedia.filter(file => file.type === MediaType.AUDIO), [allMedia]);
+  const allVideoFiles = useMemo(() => allMedia.filter(file => file.type === MediaType.VIDEO), [allMedia]);
+
+  const audioAlbums = useMemo<Album[]>(() => {
+    const albumMap = new Map<string, MediaItem[]>();
+    allAudioFiles.forEach(song => {
+        if (!song.album) return;
+        const albumId = `${song.artist}|${song.album}`;
+        if (!albumMap.has(albumId)) {
+            albumMap.set(albumId, []);
+        }
+        albumMap.get(albumId)!.push(song);
+    });
+
+    return Array.from(albumMap.entries()).map(([id, songs]) => ({
+        id,
+        title: songs[0].album,
+        artist: songs[0].artist,
+        coverArt: songs[0].coverArt,
+        items: songs,
+    })).sort((a,b) => a.title.localeCompare(b.title));
+  }, [allAudioFiles]);
+
+  const audioArtists = useMemo<Artist[]>(() => {
+      const artistMap = new Map<string, MediaItem[]>();
+      allAudioFiles.forEach(song => {
+          if (!artistMap.has(song.artist)) {
+              artistMap.set(song.artist, []);
+          }
+          artistMap.get(song.artist)!.push(song);
+      });
+
+      return Array.from(artistMap.entries()).map(([name, songs]) => {
+          const artistAlbums = audioAlbums.filter(album => album.artist === name);
+          return {
+              id: name,
+              name,
+              coverArt: artistAlbums[0]?.coverArt || songs[0]?.coverArt || '',
+              albums: artistAlbums
+          };
+      }).filter(artist => artist.name).sort((a,b) => a.name.localeCompare(b.name));
+  }, [allAudioFiles, audioAlbums]);
+
+  const videoAlbums = useMemo<Album[]>(() => {
+    const albumMap = new Map<string, MediaItem[]>();
+    allVideoFiles.forEach(video => {
+        if (!video.album) return;
+        const albumId = `${video.artist}|${video.album}`;
+        if (!albumMap.has(albumId)) {
+            albumMap.set(albumId, []);
+        }
+        albumMap.get(albumId)!.push(video);
+    });
+
+    return Array.from(albumMap.entries()).map(([id, videos]) => ({
+        id,
+        title: videos[0].album,
+        artist: videos[0].artist,
+        coverArt: videos[0].coverArt,
+        items: videos,
+    })).sort((a,b) => a.title.localeCompare(b.title));
+  }, [allVideoFiles]);
+
+  const videoArtists = useMemo<Artist[]>(() => {
+      const artistMap = new Map<string, MediaItem[]>();
+      allVideoFiles.forEach(video => {
+          if (!artistMap.has(video.artist)) {
+              artistMap.set(video.artist, []);
+          }
+          artistMap.get(video.artist)!.push(video);
+      });
+
+      return Array.from(artistMap.entries()).map(([name, videos]) => {
+          const artistAlbums = videoAlbums.filter(album => album.artist === name);
+          return {
+              id: name,
+              name,
+              coverArt: artistAlbums[0]?.coverArt || videos[0]?.coverArt || '',
+              albums: artistAlbums
+          };
+      }).filter(artist => artist.name).sort((a,b) => a.name.localeCompare(b.name));
+  }, [allVideoFiles, videoAlbums]);
+
+
   const handleSelectMedia = useCallback((media: MediaItem, queueContext?: MediaItem[]) => {
     setSearchQuery(''); 
-    
     if (media.type === MediaType.AUDIO) {
       player.selectTrack(media, queueContext);
     } else {
@@ -78,23 +171,51 @@ function App() {
 
   const handleSetView = (view: View) => {
     setCurrentView(view);
-    // Don't deselect audio, just videos
     if (selectedMedia && selectedMedia.type === MediaType.VIDEO) {
       setSelectedMedia(null);
     }
-    setSearchQuery(''); // Clear search when changing view
-    setActivePlaylist(null); // Clear active playlist
+    setSearchQuery('');
+    setActivePlaylist(null);
+    setSelectedAlbum(null);
+    setSelectedArtist(null);
   };
 
   const handleSelectPlaylist = (playlist: Playlist) => {
     setActivePlaylist(playlist);
     setCurrentView(View.PLAYLIST);
     setSearchQuery('');
+    setSelectedAlbum(null);
+    setSelectedArtist(null);
   };
 
   const handleBackToPlaylists = () => {
     setActivePlaylist(null);
   };
+  
+  const handleSelectAlbum = (album: Album) => {
+    setSelectedAlbum(album);
+    setSelectedArtist(null);
+    setActivePlaylist(null);
+    // This is a bit of a hack, but ensures the view is correct
+    const type = album.items[0]?.type;
+    if (type === MediaType.AUDIO) setCurrentView(View.AUDIO);
+    if (type === MediaType.VIDEO) setCurrentView(View.VIDEO);
+  };
+  
+  const handleSelectArtist = (artist: Artist) => {
+    setSelectedArtist(artist);
+    setSelectedAlbum(null);
+    setActivePlaylist(null);
+    const type = artist.albums[0]?.items[0]?.type;
+    if (type === MediaType.AUDIO) setCurrentView(View.AUDIO);
+    if (type === MediaType.VIDEO) setCurrentView(View.VIDEO);
+  };
+
+  const handleBackToLibrary = () => {
+      setSelectedAlbum(null);
+      setSelectedArtist(null);
+  };
+
 
   const handleAddLocalFiles = (newFiles: MediaItem[]) => {
     setLocalMediaFiles(prevFiles => {
@@ -190,8 +311,6 @@ function App() {
       return <VideoPlayer media={selectedMedia} onBack={handleBackFromVideo} />;
     }
 
-    const allMedia = [...MEDIA_FILES, ...localMediaFiles];
-
     if (searchQuery) {
       return <SearchView 
         searchQuery={searchQuery}
@@ -207,36 +326,74 @@ function App() {
 
     switch (currentView) {
       case View.AUDIO:
-        const audioFiles = allMedia.filter(file => file.type === MediaType.AUDIO);
-        return <Library 
-          title="Audio Tracks" 
-          mediaFiles={audioFiles} 
-          onSelectMedia={handleSelectMedia}
-          viewMode={libraryViewMode}
-          setViewMode={setLibraryViewMode} 
-          playlists={playlists}
-          onAddToPlaylist={handleAddToPlaylist}
-          onAddToQueue={player.addToQueue}
-          onRemoveLocalFile={handleRemoveLocalFile}
-          onRemoveFromPlaylist={handleRemoveFromPlaylist}
-          selectedCategory={selectedAudioCategory}
-          onSelectCategory={setSelectedAudioCategory}
+        if (selectedAlbum) {
+          return <AlbumView 
+            album={selectedAlbum} 
+            onBack={handleBackToLibrary}
+            onSelectMedia={handleSelectMedia}
+            onAddToPlaylist={handleAddToPlaylist}
+            onAddToQueue={player.addToQueue}
+            playlists={playlists}
+          />
+        }
+        if (selectedArtist) {
+            return <ArtistView 
+              artist={selectedArtist}
+              onBack={handleBackToLibrary}
+              onSelectAlbum={handleSelectAlbum}
+            />
+        }
+        return <MediaLibraryView 
+            mediaType={MediaType.AUDIO}
+            allMediaForType={allAudioFiles}
+            albums={audioAlbums}
+            artists={audioArtists}
+            activeSubView={audioLibrarySubView}
+            onSetSubView={setAudioLibrarySubView}
+            onSelectAlbum={handleSelectAlbum}
+            onSelectArtist={handleSelectArtist}
+            onSelectMedia={handleSelectMedia}
+            viewMode={libraryViewMode}
+            setViewMode={setLibraryViewMode}
+            playlists={playlists}
+            onAddToPlaylist={handleAddToPlaylist}
+            onAddToQueue={player.addToQueue}
+            onRemoveLocalFile={handleRemoveLocalFile}
         />;
       case View.VIDEO:
-        const videoFiles = allMedia.filter(file => file.type === MediaType.VIDEO);
-        return <Library 
-          title="Videos" 
-          mediaFiles={videoFiles} 
-          onSelectMedia={handleSelectMedia} 
-          viewMode={libraryViewMode}
-          setViewMode={setLibraryViewMode}
-          playlists={playlists}
-          onAddToPlaylist={handleAddToPlaylist}
-          onAddToQueue={player.addToQueue}
-          onRemoveLocalFile={handleRemoveLocalFile}
-          onRemoveFromPlaylist={handleRemoveFromPlaylist}
-          selectedCategory={selectedVideoCategory}
-          onSelectCategory={setSelectedVideoCategory}
+        if (selectedAlbum) {
+          return <AlbumView 
+            album={selectedAlbum} 
+            onBack={handleBackToLibrary}
+            onSelectMedia={handleSelectMedia}
+            onAddToPlaylist={handleAddToPlaylist}
+            onAddToQueue={player.addToQueue}
+            playlists={playlists}
+          />
+        }
+        if (selectedArtist) {
+            return <ArtistView 
+              artist={selectedArtist}
+              onBack={handleBackToLibrary}
+              onSelectAlbum={handleSelectAlbum}
+            />
+        }
+        return <MediaLibraryView
+            mediaType={MediaType.VIDEO}
+            allMediaForType={allVideoFiles}
+            albums={videoAlbums}
+            artists={videoArtists}
+            activeSubView={videoLibrarySubView}
+            onSetSubView={setVideoLibrarySubView}
+            onSelectAlbum={handleSelectAlbum}
+            onSelectArtist={handleSelectArtist}
+            onSelectMedia={handleSelectMedia}
+            viewMode={libraryViewMode}
+            setViewMode={setLibraryViewMode}
+            playlists={playlists}
+            onAddToPlaylist={handleAddToPlaylist}
+            onAddToQueue={player.addToQueue}
+            onRemoveLocalFile={handleRemoveLocalFile}
         />;
       case View.PLAYLIST:
         return <Playlists
@@ -275,15 +432,17 @@ function App() {
   };
 
   const mainPaddingBottom = player.audioPlayerState !== 'hidden' 
-    ? 'pb-44 md:pb-28' // More padding when mini player is visible
-    : 'pb-24 md:pb-8';
+    ? 'pb-44 lg:pb-28'
+    : 'pb-24 lg:pb-8';
     
-  const allMedia = [...MEDIA_FILES, ...localMediaFiles];
-  const allAudioFiles = allMedia.filter(file => file.type === MediaType.AUDIO);
   const likedSongIds = playlists.find(p => p.id === LIKED_SONGS_PLAYLIST_ID)?.mediaIds || [];
 
+  if (isLoading) {
+    return <OpeningAnimation />;
+  }
+
   return (
-    <div className="text-gray-200 min-h-screen font-sans">
+    <div className="text-gray-200 min-h-screen font-sans animate-fade-in-long">
       <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} isScrolled={isScrolled} />
       <Navbar 
         currentView={currentView} 
@@ -296,7 +455,7 @@ function App() {
         currentView={currentView} 
         setView={handleSetView} 
       />
-      <main className={`pt-24 p-4 transition-all duration-300 ease-in-out ${isSidebarExpanded ? 'md:pl-64' : 'md:pl-24'} ${mainPaddingBottom}`}>
+      <main className={`pt-24 p-4 transition-all duration-300 ease-in-out ${isSidebarExpanded ? 'lg:pl-64' : 'lg:pl-24'} ${mainPaddingBottom}`}>
         {renderContent()}
       </main>
 

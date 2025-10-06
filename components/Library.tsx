@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { MediaItem, LibraryViewMode, Playlist } from '../types';
 import LibraryCard from './LibraryCard';
@@ -17,8 +18,6 @@ interface LibraryProps {
   onRemoveLocalFile?: (mediaId: number) => void;
   onRemoveFromPlaylist?: (mediaId: number, playlistId: number) => void;
   playlistContextId?: number;
-  selectedCategory?: string;
-  onSelectCategory?: (category: string) => void;
 }
 
 const Library: React.FC<LibraryProps> = ({ 
@@ -33,14 +32,9 @@ const Library: React.FC<LibraryProps> = ({
   onRemoveLocalFile,
   onRemoveFromPlaylist,
   playlistContextId,
-  selectedCategory,
-  onSelectCategory,
 }) => {
-  const categories = onSelectCategory ? ['All', ...Array.from(new Set(mediaFiles.flatMap(item => item.category ? [item.category] : [])))] : [];
 
-  const filteredMedia = selectedCategory && selectedCategory !== 'All' 
-    ? mediaFiles.filter(item => item.category === selectedCategory) 
-    : mediaFiles;
+  const filteredMedia = mediaFiles;
 
   return (
     <div>
@@ -52,30 +46,9 @@ const Library: React.FC<LibraryProps> = ({
         </div>
       </div>
 
-      {onSelectCategory && categories.length > 1 && (
-        <div className="flex items-center space-x-2 mb-6 overflow-x-auto pb-2 -mx-4 px-4">
-          {categories.map(category => (
-            <button
-              key={category}
-              onClick={() => onSelectCategory(category)}
-              className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${
-                selectedCategory === category
-                  ? 'bg-white text-black'
-                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      )}
-
       {filteredMedia.length === 0 ? (
         <p className="text-gray-500">
-          {selectedCategory && selectedCategory !== 'All' 
-              ? `No items in the "${selectedCategory}" category.` 
-              : 'This collection is empty.'
-          }
+          {'This collection is empty.'}
         </p>
       ) : (
         <>

@@ -28,7 +28,8 @@ const Browse: React.FC<BrowseProps> = ({ onFilesAdded, localMediaFiles, onSelect
     if (!files || files.length === 0) return;
 
     // FIX: Explicitly type `file` as `File` to resolve TypeScript errors when accessing its properties.
-    const newMediaItems: MediaItem[] = Array.from(files).map((file: File, index) => {
+    // FIX: Explicitly set the return type of map to `MediaItem | null` to fix the type predicate error.
+    const newMediaItems: MediaItem[] = Array.from(files).map((file: File, index): MediaItem | null => {
       const isAudio = file.type.startsWith('audio/');
       const isVideo = file.type.startsWith('video/');
 
@@ -40,6 +41,8 @@ const Browse: React.FC<BrowseProps> = ({ onFilesAdded, localMediaFiles, onSelect
         id: Date.now() + index, // Simple unique ID
         title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
         artist: 'Local File',
+        album: 'Unknown Album',
+        genre: 'Unknown',
         type: isAudio ? MediaType.AUDIO : MediaType.VIDEO,
         src: URL.createObjectURL(file),
         coverArt: `https://picsum.photos/seed/${Date.now() + index}/400`, // Generic placeholder
