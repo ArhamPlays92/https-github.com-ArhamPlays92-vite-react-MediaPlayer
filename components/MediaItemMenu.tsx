@@ -1,0 +1,135 @@
+import React from 'react';
+import { MediaItem, Playlist } from '../types';
+import TrashIcon from './icons/TrashIcon';
+
+interface MediaItemMenuProps {
+    item: MediaItem;
+    playlists: Playlist[];
+    onAddToPlaylist: (mediaId: number, playlistId: number) => void;
+    onClose: () => void;
+    onRemoveLocalFile?: (mediaId: number) => void;
+    onRemoveFromPlaylist?: (mediaId: number, playlistId: number) => void;
+    contextPlaylistId?: number;
+}
+
+const MediaItemMenu: React.FC<MediaItemMenuProps> = ({ 
+    item, 
+    playlists, 
+    onAddToPlaylist, 
+    onClose,
+    onRemoveLocalFile,
+    onRemoveFromPlaylist,
+    contextPlaylistId
+}) => {
+    
+    const handleSelectPlaylist = (playlistId: number) => {
+        onAddToPlaylist(item.id, playlistId);
+        onClose();
+    };
+
+    const handleRemoveFile = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if(onRemoveLocalFile) {
+            onRemoveLocalFile(item.id);
+        }
+        onClose();
+    }
+    
+    const handleRemoveFromPlaylist = (playlistId: number) => {
+        if (onRemoveFromPlaylist) {
+            onRemoveFromPlaylist(item.id, playlistId);
+        }
+        onClose();
+    }
+
+    const isLocalFile = item.src.startsWith('blob:');
+    
+    const playlistsIn = playlists.filter(p => p.mediaIds.includes(item.id));
+    const playlistsNotIn = playlists.filter(p => !p.mediaIds.includes(item.id));
+
+    // If we're inside a specific playlist view, simplify the menu but always allow file removal
+    if (contextPlaylistId && onRemoveFromPlaylist) {
+        return (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-black/50 backdrop-blur-lg border border-white/10 rounded-md shadow-lg z-30">
+                <div className="p-1">
+                    <button
+                        onClick={() => handleRemoveFromPlaylist(contextPlaylistId)}
+                        className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/30 rounded flex items-center gap-3 focus:outline-none focus-visible:bg-red-500/40"
+                    >
+                        <TrashIcon className="w-4 h-4" />
+                        Remove from this Playlist
+                    </button>
+                    {isLocalFile && onRemoveLocalFile && (
+                        <>
+                            <div className="h-px bg-white/10 my-1" />
+                            <button
+                                onClick={handleRemoveFile}
+                                className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/30 rounded flex items-center gap-3 focus:outline-none focus-visible:bg-red-500/40"
+                            >
+                                <TrashIcon className="w-4 h-4" />
+                                Remove from Library
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        );
+    }
+    
+    // Global menu view
+    return (
+        <div className="absolute right-0 top-full mt-2 w-56 bg-black/50 backdrop-blur-lg border border-white/10 rounded-md shadow-lg z-30">
+            <div className="p-1 max-h-80 overflow-y-auto">
+                {isLocalFile && onRemoveLocalFile && (
+                     <button
+                        onClick={handleRemoveFile}
+                        className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/30 rounded flex items-center gap-3 focus:outline-none focus-visible:bg-red-500/40"
+                    >
+                        <TrashIcon className="w-4 h-4" />
+                        Remove from Library
+                    </button>
+                )}
+
+                {playlistsIn.length > 0 && (
+                    <>
+                        <div className="h-px bg-white/10 my-1" />
+                        <p className="px-3 py-2 text-xs font-semibold text-gray-300">In Playlists</p>
+                        {playlistsIn.map(playlist => (
+                            <div key={playlist.id} className="group/item flex justify-between items-center w-full text-left px-3 py-2 text-sm text-gray-200 rounded">
+                                <span className="truncate">{playlist.name}</span>
+                                <button onClick={() => handleRemoveFromPlaylist(playlist.id)} className="opacity-0 group-hover/item:opacity-100 text-gray-300 hover:text-white rounded focus:outline-none focus-visible:bg-white/20" title="Remove">
+                                    <TrashIcon className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
+                    </>
+                )}
+
+                {playlistsNotIn.length > 0 && (
+                    <>
+                         <div className="h-px bg-white/10 my-1" />
+                        <p className="px-3 py-2 text-xs font-semibold text-gray-300">Add to playlist</p>
+                        {playlistsNotIn.map(playlist => (
+                            <button
+                                key={playlist.id}
+                                onClick={() => handleSelectPlaylist(playlist.id)}
+                                className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-white/20 rounded focus:outline-none focus-visible:bg-white/30"
+                            >
+                                {playlist.name}
+                            </button>
+                        ))}
+                    </>
+                )}
+                
+                {playlists.length === 0 && (
+                     <>
+                        <div className="h-px bg-white/10 my-1" />
+                        <p className="px-3 py-2 text-sm text-gray-500">No playlists yet.</p>
+                     </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default MediaItemMenu;

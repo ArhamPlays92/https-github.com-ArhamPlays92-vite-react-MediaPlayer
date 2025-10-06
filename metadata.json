@@ -1,0 +1,7 @@
+{
+  "name": "Copy of React Media Player",
+  "description": "A sleek and modern audio and video player application built with React, TypeScript, and Tailwind CSS. It features separate views for a media library, an audio player, and a video player.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
