@@ -15,18 +15,20 @@ interface BrowseProps {
   setViewMode: (mode: LibraryViewMode) => void;
   playlists: Playlist[];
   onAddToPlaylist: (mediaId: number, playlistId: number) => void;
+  onAddToQueue?: (item: MediaItem) => void;
   onRemoveLocalFile: (mediaId: number) => void;
   onRemoveFromPlaylist: (mediaId: number, playlistId: number) => void;
 }
 
-const Browse: React.FC<BrowseProps> = ({ onFilesAdded, localMediaFiles, onSelectMedia, viewMode, setViewMode, playlists, onAddToPlaylist, onRemoveLocalFile, onRemoveFromPlaylist }) => {
+const Browse: React.FC<BrowseProps> = ({ onFilesAdded, localMediaFiles, onSelectMedia, viewMode, setViewMode, playlists, onAddToPlaylist, onAddToQueue, onRemoveLocalFile, onRemoveFromPlaylist }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    const newMediaItems: MediaItem[] = Array.from(files).map((file, index) => {
+    // FIX: Explicitly type `file` as `File` to resolve TypeScript errors when accessing its properties.
+    const newMediaItems: MediaItem[] = Array.from(files).map((file: File, index) => {
       const isAudio = file.type.startsWith('audio/');
       const isVideo = file.type.startsWith('video/');
 
@@ -110,6 +112,7 @@ const Browse: React.FC<BrowseProps> = ({ onFilesAdded, localMediaFiles, onSelect
                       onSelect={() => onSelectMedia(item, localMediaFiles)} 
                       playlists={playlists}
                       onAddToPlaylist={onAddToPlaylist}
+                      onAddToQueue={onAddToQueue}
                       onRemoveLocalFile={onRemoveLocalFile}
                       onRemoveFromPlaylist={onRemoveFromPlaylist}
                     />
@@ -124,6 +127,7 @@ const Browse: React.FC<BrowseProps> = ({ onFilesAdded, localMediaFiles, onSelect
                       onSelect={() => onSelectMedia(item, localMediaFiles)} 
                       playlists={playlists}
                       onAddToPlaylist={onAddToPlaylist}
+                      onAddToQueue={onAddToQueue}
                       onRemoveLocalFile={onRemoveLocalFile}
                       onRemoveFromPlaylist={onRemoveFromPlaylist}
                     />
@@ -141,6 +145,7 @@ const Browse: React.FC<BrowseProps> = ({ onFilesAdded, localMediaFiles, onSelect
                   onSelect={() => onSelectMedia(item, localMediaFiles)} 
                   playlists={playlists}
                   onAddToPlaylist={onAddToPlaylist}
+                  onAddToQueue={onAddToQueue}
                   onRemoveLocalFile={onRemoveLocalFile}
                   onRemoveFromPlaylist={onRemoveFromPlaylist}
                 />

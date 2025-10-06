@@ -13,6 +13,7 @@ interface SearchViewProps {
     onSelectMedia: (media: MediaItem, queueContext?: MediaItem[]) => void;
     onSelectPlaylist: (playlist: Playlist) => void;
     onAddToPlaylist: (mediaId: number, playlistId: number) => void;
+    onAddToQueue?: (item: MediaItem) => void;
     onRemoveLocalFile: (mediaId: number) => void;
 }
 
@@ -23,6 +24,7 @@ const SearchView: React.FC<SearchViewProps> = ({
     onSelectMedia,
     onSelectPlaylist,
     onAddToPlaylist,
+    onAddToQueue,
     onRemoveLocalFile
 }) => {
     const lowerCaseQuery = searchQuery.toLowerCase();
@@ -62,6 +64,7 @@ const SearchView: React.FC<SearchViewProps> = ({
                                 onSelect={() => onSelectMedia(item)}
                                 playlists={allPlaylists}
                                 onAddToPlaylist={onAddToPlaylist}
+                                onAddToQueue={onAddToQueue}
                                 onRemoveLocalFile={onRemoveLocalFile}
                             />
                         ))}
@@ -96,6 +99,7 @@ const SearchView: React.FC<SearchViewProps> = ({
                                 onSelect={() => onSelectMedia(item, audioResults)}
                                 playlists={allPlaylists}
                                 onAddToPlaylist={onAddToPlaylist}
+                                onAddToQueue={onAddToQueue}
                                 onRemoveLocalFile={onRemoveLocalFile}
                             />
                         ))}

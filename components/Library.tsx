@@ -13,6 +13,7 @@ interface LibraryProps {
   setViewMode: (mode: LibraryViewMode) => void;
   playlists: Playlist[];
   onAddToPlaylist: (mediaId: number, playlistId: number) => void;
+  onAddToQueue?: (item: MediaItem) => void;
   onRemoveLocalFile?: (mediaId: number) => void;
   onRemoveFromPlaylist?: (mediaId: number, playlistId: number) => void;
   playlistContextId?: number;
@@ -28,6 +29,7 @@ const Library: React.FC<LibraryProps> = ({
   setViewMode, 
   playlists, 
   onAddToPlaylist,
+  onAddToQueue,
   onRemoveLocalFile,
   onRemoveFromPlaylist,
   playlistContextId,
@@ -88,6 +90,7 @@ const Library: React.FC<LibraryProps> = ({
                   onSelect={() => onSelectMedia(item, filteredMedia)} 
                   playlists={playlists}
                   onAddToPlaylist={onAddToPlaylist}
+                  onAddToQueue={onAddToQueue}
                   onRemoveLocalFile={onRemoveLocalFile}
                   onRemoveFromPlaylist={onRemoveFromPlaylist}
                   contextPlaylistId={playlistContextId}
@@ -103,6 +106,7 @@ const Library: React.FC<LibraryProps> = ({
                   onSelect={() => onSelectMedia(item, filteredMedia)} 
                   playlists={playlists}
                   onAddToPlaylist={onAddToPlaylist}
+                  onAddToQueue={onAddToQueue}
                   onRemoveLocalFile={onRemoveLocalFile}
                   onRemoveFromPlaylist={onRemoveFromPlaylist}
                   contextPlaylistId={playlistContextId}
@@ -121,6 +125,7 @@ const Library: React.FC<LibraryProps> = ({
               onSelect={() => onSelectMedia(item, filteredMedia)} 
               playlists={playlists}
               onAddToPlaylist={onAddToPlaylist}
+              onAddToQueue={onAddToQueue}
               onRemoveLocalFile={onRemoveLocalFile}
               onRemoveFromPlaylist={onRemoveFromPlaylist}
               contextPlaylistId={playlistContextId}

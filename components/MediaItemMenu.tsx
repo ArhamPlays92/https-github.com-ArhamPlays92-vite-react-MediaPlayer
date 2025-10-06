@@ -1,11 +1,13 @@
 import React from 'react';
 import { MediaItem, Playlist } from '../types';
 import TrashIcon from './icons/TrashIcon';
+import PlusIcon from './icons/PlusIcon';
 
 interface MediaItemMenuProps {
     item: MediaItem;
     playlists: Playlist[];
     onAddToPlaylist: (mediaId: number, playlistId: number) => void;
+    onAddToQueue?: (item: MediaItem) => void;
     onClose: () => void;
     onRemoveLocalFile?: (mediaId: number) => void;
     onRemoveFromPlaylist?: (mediaId: number, playlistId: number) => void;
@@ -16,6 +18,7 @@ const MediaItemMenu: React.FC<MediaItemMenuProps> = ({
     item, 
     playlists, 
     onAddToPlaylist, 
+    onAddToQueue,
     onClose,
     onRemoveLocalFile,
     onRemoveFromPlaylist,
@@ -52,6 +55,15 @@ const MediaItemMenu: React.FC<MediaItemMenuProps> = ({
         return (
             <div className="absolute right-0 top-full mt-2 w-56 bg-black/50 backdrop-blur-lg border border-white/10 rounded-md shadow-lg z-30">
                 <div className="p-1">
+                     {onAddToQueue && (
+                        <button
+                            onClick={() => { onAddToQueue(item); onClose(); }}
+                            className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-white/20 rounded flex items-center gap-3 focus:outline-none focus-visible:bg-white/30"
+                        >
+                            <PlusIcon className="w-4 h-4" />
+                            Add to Queue
+                        </button>
+                    )}
                     <button
                         onClick={() => handleRemoveFromPlaylist(contextPlaylistId)}
                         className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/30 rounded flex items-center gap-3 focus:outline-none focus-visible:bg-red-500/40"
@@ -80,6 +92,15 @@ const MediaItemMenu: React.FC<MediaItemMenuProps> = ({
     return (
         <div className="absolute right-0 top-full mt-2 w-56 bg-black/50 backdrop-blur-lg border border-white/10 rounded-md shadow-lg z-30">
             <div className="p-1 max-h-80 overflow-y-auto">
+                {onAddToQueue && (
+                    <button
+                        onClick={() => { onAddToQueue(item); onClose(); }}
+                        className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-white/20 rounded flex items-center gap-3 focus:outline-none focus-visible:bg-white/30"
+                    >
+                        <PlusIcon className="w-4 h-4" />
+                        Add to Queue
+                    </button>
+                )}
                 {isLocalFile && onRemoveLocalFile && (
                      <button
                         onClick={handleRemoveFile}
@@ -97,9 +118,11 @@ const MediaItemMenu: React.FC<MediaItemMenuProps> = ({
                         {playlistsIn.map(playlist => (
                             <div key={playlist.id} className="group/item flex justify-between items-center w-full text-left px-3 py-2 text-sm text-gray-200 rounded">
                                 <span className="truncate">{playlist.name}</span>
-                                <button onClick={() => handleRemoveFromPlaylist(playlist.id)} className="opacity-0 group-hover/item:opacity-100 text-gray-300 hover:text-white rounded focus:outline-none focus-visible:bg-white/20" title="Remove">
-                                    <TrashIcon className="w-4 h-4" />
-                                </button>
+                                {onRemoveFromPlaylist && 
+                                    <button onClick={() => handleRemoveFromPlaylist(playlist.id)} className="opacity-0 group-hover/item:opacity-100 text-gray-300 hover:text-white rounded focus:outline-none focus-visible:bg-white/20" title="Remove">
+                                        <TrashIcon className="w-4 h-4" />
+                                    </button>
+                                }
                             </div>
                         ))}
                     </>

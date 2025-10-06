@@ -45,6 +45,11 @@
     animation: slide-up-fade-in 0.5s ease-out forwards;
   }
 
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+
   /* Custom Range Input Styles */
   input[type="range"] {
     -webkit-appearance: none;
@@ -104,6 +109,21 @@
 
   input[type="range"]:hover::-moz-range-thumb {
     transform: scale(1.1);
+  }
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
   }
 </style>
 </head>

@@ -14,9 +14,9 @@ const shuffleArray = (array: MediaItem[]) => {
 
 export const useAudioPlayer = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  
   const [audioPlayerState, setAudioPlayerState] = useState<AudioPlayerState>('hidden');
   const [isPlaying, setIsPlaying] = useState(false);
-  // FIX: Rename useState setter to avoid redeclaring 'setVolume'.
   const [volume, _setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -82,7 +82,6 @@ export const useAudioPlayer = () => {
       audioRef.current.muted = newMuted;
       if (!newMuted && audioRef.current.volume === 0) {
         audioRef.current.volume = 0.5;
-        // FIX: Use the renamed state setter.
         _setVolume(0.5);
       }
     }
@@ -201,6 +200,66 @@ export const useAudioPlayer = () => {
 
   }, [playQueue, shuffledPlayQueue, currentQueueIndex, isShuffling, closePlayer]);
   
+  const reorderQueue = useCallback((startIndex: number, endIndex: number) => {
+    const activeQueue = isShuffling ? shuffledPlayQueue : playQueue;
+    const setActiveQueue = isShuffling ? setShuffledPlayQueue : setPlayQueue;
+
+    if (startIndex === endIndex || !activeQueue[startIndex] || !activeQueue[endIndex]) {
+        return;
+    }
+
+    const newQueue = [...activeQueue];
+    const [movedItem] = newQueue.splice(startIndex, 1);
+    newQueue.splice(endIndex, 0, movedItem);
+
+    setActiveQueue(newQueue);
+    
+    if (currentQueueIndex === startIndex) {
+        setCurrentQueueIndex(endIndex);
+    } else if (startIndex < currentQueueIndex && endIndex >= currentQueueIndex) {
+        setCurrentQueueIndex(prev => prev - 1);
+    } else if (startIndex > currentQueueIndex && endIndex <= currentQueueIndex) {
+        setCurrentQueueIndex(prev => prev + 1);
+    }
+  }, [isShuffling, shuffledPlayQueue, playQueue, currentQueueIndex]);
+  
+  const addToQueue = useCallback((mediaItem: MediaItem) => {
+    // If song is already in the queue, do nothing.
+    if (playQueue.find(track => track.id === mediaItem.id)) {
+        return;
+    }
+
+    // If there is no active queue, start a new one with this track.
+    if (audioPlayerState === 'hidden' || currentQueueIndex === -1) {
+        const newQueue = [mediaItem];
+        setPlayQueue(newQueue);
+        setShuffledPlayQueue(newQueue); // A queue of one doesn't need shuffling
+        setCurrentQueueIndex(0);
+        setAudioPlayerState('minimized'); // Start with mini player
+        return;
+    }
+
+    // If there is an active queue, add the song after the current one.
+    const insertIndex = currentQueueIndex + 1;
+    const newPlayQueue = [...playQueue];
+    newPlayQueue.splice(insertIndex, 0, mediaItem);
+    setPlayQueue(newPlayQueue);
+
+    // And also update the shuffled queue. Add it after the current track in the shuffled queue.
+    const newShuffledQueue = [...shuffledPlayQueue];
+    const currentTrackInShuffledQueueIndex = shuffledPlayQueue.findIndex(track => track.id === currentTrack?.id);
+    
+    if (currentTrackInShuffledQueueIndex > -1) {
+        newShuffledQueue.splice(currentTrackInShuffledQueueIndex + 1, 0, mediaItem);
+    } else {
+        // Fallback: if current track isn't found in shuffled queue (shouldn't happen), add to end.
+        newShuffledQueue.push(mediaItem);
+    }
+    setShuffledPlayQueue(newShuffledQueue);
+
+  }, [playQueue, shuffledPlayQueue, currentQueueIndex, currentTrack, audioPlayerState]);
+
+
   useEffect(() => {
     const audio = audioRef.current;
     if (audio && currentTrack && audio.src !== currentTrack.src) {
@@ -221,7 +280,6 @@ export const useAudioPlayer = () => {
       const onTimeUpdate = () => setCurrentTime(audio.currentTime);
       const onLoadedMetadata = () => setDuration(audio.duration);
       const onVolumeChange = () => {
-          // FIX: Use the renamed state setter.
           _setVolume(audio.volume);
           setIsMuted(audio.muted);
       };
@@ -273,5 +331,10 @@ export const useAudioPlayer = () => {
     removeFromQueue,
     isNextAvailable,
     isPreviousAvailable,
+    reorderQueue,
+    playQueue,
+    shuffledPlayQueue,
+    currentQueueIndex,
+    addToQueue,
   };
 };

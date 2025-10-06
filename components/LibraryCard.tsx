@@ -8,12 +8,13 @@ interface LibraryCardProps {
     onSelect: () => void;
     playlists: Playlist[];
     onAddToPlaylist: (mediaId: number, playlistId: number) => void;
+    onAddToQueue?: (item: MediaItem) => void;
     onRemoveLocalFile?: (mediaId: number) => void;
     onRemoveFromPlaylist?: (mediaId: number, playlistId: number) => void;
     contextPlaylistId?: number;
 }
 
-const LibraryCard: React.FC<LibraryCardProps> = ({ item, onSelect, playlists, onAddToPlaylist, onRemoveLocalFile, onRemoveFromPlaylist, contextPlaylistId }) => {
+const LibraryCard: React.FC<LibraryCardProps> = ({ item, onSelect, playlists, onAddToPlaylist, onAddToQueue, onRemoveLocalFile, onRemoveFromPlaylist, contextPlaylistId }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -73,6 +74,7 @@ const LibraryCard: React.FC<LibraryCardProps> = ({ item, onSelect, playlists, on
                         item={item}
                         playlists={playlists}
                         onAddToPlaylist={onAddToPlaylist}
+                        onAddToQueue={onAddToQueue}
                         onClose={() => setMenuOpen(false)}
                         onRemoveFromPlaylist={onRemoveFromPlaylist}
                         onRemoveLocalFile={onRemoveLocalFile}

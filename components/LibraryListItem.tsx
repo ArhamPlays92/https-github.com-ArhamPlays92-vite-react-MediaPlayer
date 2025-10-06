@@ -9,12 +9,13 @@ interface LibraryListItemProps {
     onSelect: () => void;
     playlists: Playlist[];
     onAddToPlaylist: (mediaId: number, playlistId: number) => void;
+    onAddToQueue?: (item: MediaItem) => void;
     onRemoveLocalFile?: (mediaId: number) => void;
     onRemoveFromPlaylist?: (mediaId: number, playlistId: number) => void;
     contextPlaylistId?: number;
 }
 
-const LibraryListItem: React.FC<LibraryListItemProps> = ({ item, onSelect, playlists, onAddToPlaylist, onRemoveLocalFile, onRemoveFromPlaylist, contextPlaylistId }) => {
+const LibraryListItem: React.FC<LibraryListItemProps> = ({ item, onSelect, playlists, onAddToPlaylist, onAddToQueue, onRemoveLocalFile, onRemoveFromPlaylist, contextPlaylistId }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +73,7 @@ const LibraryListItem: React.FC<LibraryListItemProps> = ({ item, onSelect, playl
                         item={item}
                         playlists={playlists}
                         onAddToPlaylist={onAddToPlaylist}
+                        onAddToQueue={onAddToQueue}
                         onClose={() => setMenuOpen(false)}
                         onRemoveFromPlaylist={onRemoveFromPlaylist}
                         onRemoveLocalFile={onRemoveLocalFile}

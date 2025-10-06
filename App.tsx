@@ -1,6 +1,6 @@
 
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Header from './components/Header';
 import Library from './components/Library';
 import AudioPlayer from './components/AudioPlayer';
@@ -41,6 +41,23 @@ function App() {
     message: '',
     onConfirm: () => {},
   });
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // A small threshold to prevent firing on minimal scroll
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Initial check in case the page loads scrolled
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   
   const player = useAudioPlayer();
   
@@ -171,6 +188,7 @@ function App() {
         onSelectMedia={handleSelectMedia}
         onSelectPlaylist={handleSelectPlaylist}
         onAddToPlaylist={handleAddToPlaylist}
+        onAddToQueue={player.addToQueue}
         onRemoveLocalFile={handleRemoveLocalFile}
       />
     }
@@ -186,6 +204,7 @@ function App() {
           setViewMode={setLibraryViewMode} 
           playlists={playlists}
           onAddToPlaylist={handleAddToPlaylist}
+          onAddToQueue={player.addToQueue}
           onRemoveLocalFile={handleRemoveLocalFile}
           onRemoveFromPlaylist={handleRemoveFromPlaylist}
           selectedCategory={selectedAudioCategory}
@@ -201,6 +220,7 @@ function App() {
           setViewMode={setLibraryViewMode}
           playlists={playlists}
           onAddToPlaylist={handleAddToPlaylist}
+          onAddToQueue={player.addToQueue}
           onRemoveLocalFile={handleRemoveLocalFile}
           onRemoveFromPlaylist={handleRemoveFromPlaylist}
           selectedCategory={selectedVideoCategory}
@@ -217,6 +237,7 @@ function App() {
           viewMode={libraryViewMode}
           setViewMode={setLibraryViewMode}
           onAddToPlaylist={handleAddToPlaylist}
+          onAddToQueue={player.addToQueue}
           onRemoveFromPlaylist={handleRemoveFromPlaylist}
           onRemoveLocalFile={handleRemoveLocalFile}
           initialSelectedPlaylist={activePlaylist}
@@ -234,6 +255,7 @@ function App() {
           setViewMode={setLibraryViewMode}
           playlists={playlists}
           onAddToPlaylist={handleAddToPlaylist}
+          onAddToQueue={player.addToQueue}
           onRemoveLocalFile={handleRemoveLocalFile}
           onRemoveFromPlaylist={handleRemoveFromPlaylist}
         />;
@@ -243,10 +265,13 @@ function App() {
   const mainPaddingBottom = player.audioPlayerState !== 'hidden' 
     ? 'pb-44 md:pb-28' // More padding when mini player is visible
     : 'pb-24 md:pb-8';
+    
+  const allMedia = [...MEDIA_FILES, ...localMediaFiles];
+  const allAudioFiles = allMedia.filter(file => file.type === MediaType.AUDIO);
 
   return (
     <div className="text-gray-200 min-h-screen font-sans">
-      <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} isScrolled={isScrolled} />
       <Navbar 
         currentView={currentView} 
         setView={handleSetView} 
@@ -285,6 +310,13 @@ function App() {
           onPrevious={player.previousTrack}
           isNextAvailable={player.isNextAvailable}
           isPreviousAvailable={player.isPreviousAvailable}
+          playQueue={player.playQueue}
+          shuffledPlayQueue={player.shuffledPlayQueue}
+          currentQueueIndex={player.currentQueueIndex}
+          reorderQueue={player.reorderQueue}
+          onRemoveFromQueue={player.removeFromQueue}
+          onAddToQueue={player.addToQueue}
+          allAudioFiles={allAudioFiles}
         />
       )}
 

@@ -17,6 +17,7 @@ interface PlaylistsProps {
   viewMode: LibraryViewMode;
   setViewMode: (mode: LibraryViewMode) => void;
   onAddToPlaylist: (mediaId: number, playlistId: number) => void;
+  onAddToQueue?: (item: MediaItem) => void;
   onRemoveFromPlaylist: (mediaId: number, playlistId: number) => void;
   onRemoveLocalFile: (mediaId: number) => void;
   initialSelectedPlaylist: Playlist | null;
@@ -76,6 +77,7 @@ const Playlists: React.FC<PlaylistsProps> = ({
     viewMode, 
     setViewMode, 
     onAddToPlaylist,
+    onAddToQueue,
     onRemoveFromPlaylist,
     onRemoveLocalFile,
     initialSelectedPlaylist,
@@ -133,6 +135,7 @@ const Playlists: React.FC<PlaylistsProps> = ({
           setViewMode={setViewMode}
           playlists={playlists}
           onAddToPlaylist={onAddToPlaylist}
+          onAddToQueue={onAddToQueue}
           onRemoveLocalFile={onRemoveLocalFile}
           onRemoveFromPlaylist={(mediaId: number) => onRemoveFromPlaylist(mediaId, selectedPlaylist.id)}
           playlistContextId={selectedPlaylist.id}

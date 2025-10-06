@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import SearchIcon from './icons/SearchIcon';
 import CloseIcon from './icons/CloseIcon';
@@ -6,13 +7,21 @@ import CloseIcon from './icons/CloseIcon';
 interface HeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  isScrolled: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange }) => {
+const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, isScrolled }) => {
   const [isMobileSearchActive, setMobileSearchActive] = useState(false);
 
+  // The header should be opaque if scrolled OR if the mobile search is active for a better UI.
+  const headerIsOpaque = isScrolled || isMobileSearchActive;
+
+  const scrolledClasses = headerIsOpaque
+    ? 'bg-black/50 backdrop-blur-lg border-b border-gray-800'
+    : 'border-b border-transparent';
+
   return (
-    <header className="bg-black/50 backdrop-blur-lg border-b border-gray-800 p-4 fixed w-full top-0 z-20 h-20 flex items-center">
+    <header className={`p-4 sticky w-full top-0 z-20 h-20 flex items-center transition-all duration-300 ${scrolledClasses}`}>
       <div className="container mx-auto flex justify-between items-center gap-4">
         {/* Title/Logo */}
         <div className={`flex items-center space-x-3 ${isMobileSearchActive ? 'hidden' : 'flex'}`}>
