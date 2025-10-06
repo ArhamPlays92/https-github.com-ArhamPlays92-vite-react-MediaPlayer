@@ -1,5 +1,3 @@
-
-
 import React, { useState, useCallback, useEffect } from 'react';
 import Header from './components/Header';
 import Library from './components/Library';
@@ -13,7 +11,7 @@ import ConfirmationModal from './components/ConfirmationModal';
 import SearchView from './components/SearchView';
 import MiniPlayer from './components/MiniPlayer';
 import Transcribe from './components/Transcribe';
-import { MEDIA_FILES, INITIAL_PLAYLISTS } from './constants';
+import { MEDIA_FILES, INITIAL_PLAYLISTS, LIKED_SONGS_PLAYLIST_ID } from './constants';
 import { MediaItem, View, MediaType, LibraryViewMode, Playlist } from './types';
 import { useAudioPlayer } from './hooks/useAudioPlayer';
 
@@ -123,12 +121,12 @@ function App() {
     });
   };
 
-  const handleCreatePlaylist = (name: string) => {
+  const handleCreatePlaylist = (name: string, mediaIdToAdd?: number) => {
     if (name.trim() === '') return;
     const newPlaylist: Playlist = {
       id: Date.now(),
       name,
-      mediaIds: [], // Start with an empty playlist
+      mediaIds: mediaIdToAdd ? [mediaIdToAdd] : [],
     };
     setPlaylists(prev => [...prev, newPlaylist]);
   };
@@ -172,6 +170,20 @@ function App() {
         return p;
     }));
   };
+  
+  const handleToggleLike = (mediaId: number) => {
+    setPlaylists(prev => prev.map(p => {
+        if (p.id === LIKED_SONGS_PLAYLIST_ID) {
+            const isLiked = p.mediaIds.includes(mediaId);
+            if (isLiked) {
+                return { ...p, mediaIds: p.mediaIds.filter(id => id !== mediaId) };
+            } else {
+                return { ...p, mediaIds: [...p.mediaIds, mediaId] };
+            }
+        }
+        return p;
+    }));
+  }
 
   const renderContent = () => {
     if (selectedMedia && selectedMedia.type === MediaType.VIDEO) {
@@ -268,6 +280,7 @@ function App() {
     
   const allMedia = [...MEDIA_FILES, ...localMediaFiles];
   const allAudioFiles = allMedia.filter(file => file.type === MediaType.AUDIO);
+  const likedSongIds = playlists.find(p => p.id === LIKED_SONGS_PLAYLIST_ID)?.mediaIds || [];
 
   return (
     <div className="text-gray-200 min-h-screen font-sans">
@@ -317,6 +330,11 @@ function App() {
           onRemoveFromQueue={player.removeFromQueue}
           onAddToQueue={player.addToQueue}
           allAudioFiles={allAudioFiles}
+          onToggleLike={handleToggleLike}
+          likedSongIds={likedSongIds}
+          playlists={playlists}
+          onAddToPlaylist={handleAddToPlaylist}
+          onCreatePlaylist={handleCreatePlaylist}
         />
       )}
 
@@ -334,6 +352,8 @@ function App() {
           onPrevious={player.previousTrack}
           isNextAvailable={player.isNextAvailable}
           isPreviousAvailable={player.isPreviousAvailable}
+          onToggleLike={handleToggleLike}
+          likedSongIds={likedSongIds}
         />
       )}
 

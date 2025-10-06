@@ -9,6 +9,7 @@ import FullscreenEnterIcon from './icons/FullscreenEnterIcon';
 import FullscreenExitIcon from './icons/FullscreenExitIcon';
 import PictureInPictureIcon from './icons/PictureInPictureIcon';
 import ChevronLeftIcon from './icons/ChevronLeftIcon';
+import Marquee from './Marquee';
 
 interface VideoPlayerProps {
   media: MediaItem;
@@ -209,13 +210,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ media, onBack }) => {
 
         {/* Top Controls */}
         <div className={`absolute top-0 left-0 right-0 z-20 p-4 md:p-6 bg-gradient-to-b from-black/70 to-transparent transition-opacity duration-300 ${isControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-4">
                 <button onClick={onBack} className="text-gray-300 hover:text-white transition-colors rounded-full p-2 bg-black/20 hover:bg-black/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80" aria-label="Back">
                     <ChevronLeftIcon className="w-6 h-6" />
                 </button>
-                <div className="text-right">
-                    <h3 className="font-semibold text-lg text-gray-100">{media.title}</h3>
-                    <p className="text-sm text-gray-400">{media.artist}</p>
+                <div className="text-right min-w-0 flex-1">
+                    <Marquee as="h3" text={media.title} className="font-semibold text-lg text-gray-100" />
+                    <Marquee as="p" text={media.artist} className="text-sm text-gray-400" />
                 </div>
             </div>
         </div>
@@ -230,8 +231,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ media, onBack }) => {
                         max={duration || 0}
                         value={currentTime}
                         onChange={handleSeek}
-                        className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer range-lg focus:outline-none focus:ring-2 focus:ring-white/50"
-                        style={{'accentColor': '#ffffff'}}
+                        className="w-full"
+                        aria-label="Seek slider"
                     />
                     <div className="flex justify-between text-xs text-gray-400 mt-2">
                         <span>{formatTime(currentTime)}</span>
@@ -243,7 +244,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ media, onBack }) => {
                         <button onClick={togglePlayPause} className="text-white hover:text-gray-300 transition-colors rounded-full p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
                             {isPlaying ? <PauseIcon size={32} /> : <PlayIcon size={32} />}
                         </button>
-                        <div className="flex items-center space-x-2 w-28">
+                        <div className="hidden md:flex items-center space-x-2 w-28">
                             <button onClick={toggleMute} className="text-white hover:text-gray-300 transition-colors rounded-full p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"><VolumeIcon size={24} /></button>
                             <input
                                 type="range"
@@ -252,8 +253,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ media, onBack }) => {
                                 step="0.01"
                                 value={isMuted ? 0 : volume}
                                 onChange={handleVolumeChange}
-                                className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
-                                style={{'accentColor': '#ffffff'}}
+                                className="w-full"
+                                aria-label="Volume slider"
                             />
                         </div>
                     </div>

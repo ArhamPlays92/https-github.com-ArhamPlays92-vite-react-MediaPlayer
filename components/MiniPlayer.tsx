@@ -1,4 +1,6 @@
 
+
+
 import React, { useRef } from 'react';
 import { MediaItem } from '../types';
 import PlayIcon from './icons/PlayIcon';
@@ -6,6 +8,8 @@ import PauseIcon from './icons/PauseIcon';
 import CloseIcon from './icons/CloseIcon';
 import SkipNextIcon from './icons/SkipNextIcon';
 import SkipPreviousIcon from './icons/SkipPreviousIcon';
+import HeartIcon from './icons/HeartIcon';
+import Marquee from './Marquee';
 
 interface MiniPlayerProps {
   media: MediaItem;
@@ -20,6 +24,8 @@ interface MiniPlayerProps {
   onPrevious: () => void;
   isNextAvailable: boolean;
   isPreviousAvailable: boolean;
+  onToggleLike: (mediaId: number) => void;
+  likedSongIds: number[];
 }
 
 const MiniPlayer: React.FC<MiniPlayerProps> = ({
@@ -35,6 +41,8 @@ const MiniPlayer: React.FC<MiniPlayerProps> = ({
   onPrevious,
   isNextAvailable,
   isPreviousAvailable,
+  onToggleLike,
+  likedSongIds
 }) => {
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -47,6 +55,8 @@ const MiniPlayer: React.FC<MiniPlayerProps> = ({
     const newTime = (clickX / width) * duration;
     onSeek(newTime);
   };
+
+  const isLiked = likedSongIds.includes(media.id);
 
   return (
     <div className="fixed left-0 right-0 bottom-16 md:bottom-0 h-20 bg-black/50 backdrop-blur-lg border-t border-gray-800 z-40 flex flex-col animate-slide-up-fade-in">
@@ -76,13 +86,20 @@ const MiniPlayer: React.FC<MiniPlayerProps> = ({
             className="w-12 h-12 rounded object-cover"
           />
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-white truncate">{media.title}</h3>
-            <p className="text-xs text-gray-400 truncate">{media.artist}</p>
+            <Marquee as="h3" text={media.title} className="text-sm font-semibold text-white" />
+            <Marquee as="p" text={media.artist} className="text-xs text-gray-400" />
           </div>
         </div>
 
         {/* Controls */}
         <div className="flex items-center space-x-0 sm:space-x-1 pl-2">
+           <button
+            onClick={(e) => { e.stopPropagation(); onToggleLike(media.id); }}
+            className={`p-2 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 ${isLiked ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+            aria-label={isLiked ? "Unlike song" : "Like song"}
+          >
+            <HeartIcon filled={isLiked} className="w-5 h-5" />
+          </button>
            <button 
             onClick={(e) => { e.stopPropagation(); onPrevious(); }}
             disabled={!isPreviousAvailable}

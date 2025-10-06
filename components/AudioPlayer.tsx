@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MediaItem, RepeatMode } from '../types';
+import { MediaItem, Playlist, RepeatMode } from '../types';
 import PlayIcon from './icons/PlayIcon';
 import PauseIcon from './icons/PauseIcon';
 import VolumeUpIcon from './icons/VolumeUpIcon';
@@ -19,6 +19,9 @@ import PlusIcon from './icons/PlusIcon';
 import CheckIcon from './icons/CheckIcon';
 import SearchIcon from './icons/SearchIcon';
 import ChevronLeftIcon from './icons/ChevronLeftIcon';
+import HeartIcon from './icons/HeartIcon';
+import AddToPlaylistModal from './AddToPlaylistModal';
+import Marquee from './Marquee';
 
 interface AudioPlayerProps {
   media: MediaItem;
@@ -47,6 +50,11 @@ interface AudioPlayerProps {
   onRemoveFromQueue: (mediaId: number) => void;
   onAddToQueue: (item: MediaItem) => void;
   allAudioFiles: MediaItem[];
+  onToggleLike: (mediaId: number) => void;
+  likedSongIds: number[];
+  playlists: Playlist[];
+  onAddToPlaylist: (mediaId: number, playlistId: number) => void;
+  onCreatePlaylist: (name: string, mediaId?: number) => void;
 }
 
 
@@ -77,17 +85,23 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   onRemoveFromQueue,
   onAddToQueue,
   allAudioFiles,
+  onToggleLike,
+  likedSongIds,
+  playlists,
+  onAddToPlaylist,
+  onCreatePlaylist,
 }) => {
   const [isQueueVisible, setIsQueueVisible] = useState(false);
+  const [isAddToPlaylistOpen, setIsAddToPlaylistOpen] = useState(false);
   const [queueView, setQueueView] = useState<'queue' | 'add'>('queue');
   const [addSongsSearch, setAddSongsSearch] = useState('');
   const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
   const dragItem = React.useRef<number | null>(null);
-  const mainRef = useRef<HTMLElement>(null);
+  const mainContentRef = useRef<HTMLDivElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const mainEl = mainRef.current;
+    const mainEl = mainContentRef.current;
     if (!mainEl) return;
 
     const handleScroll = () => {
@@ -128,10 +142,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const handleVolumeChangeInternal = (e: React.ChangeEvent<HTMLInputElement>) => {
     onVolumeChange(parseFloat(e.target.value));
   };
-  
-  const handleSeekInternal = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onSeek(parseFloat(e.target.value));
-  };
 
   const VolumeIcon = isMuted || volume === 0 ? VolumeMuteIcon : volume < 0.5 ? VolumeDownIcon : VolumeUpIcon;
 
@@ -160,6 +170,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     ? 'bg-black/50 backdrop-blur-lg border-b border-gray-800'
     : 'border-b border-transparent';
 
+  const isLiked = likedSongIds.includes(media.id);
+
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col font-sans animate-fade-in">
         {/* Background */}
@@ -175,99 +187,134 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                  <button onClick={onMinimize} className="text-gray-300 hover:text-white transition-colors rounded-full p-2 bg-black/20 hover:bg-black/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80" aria-label="Minimize player">
                     <ChevronDownIcon className="w-6 h-6" />
                 </button>
-                <div className="md:hidden text-center">
-                    <p className="text-xs text-gray-400 uppercase tracking-widest">Now Playing</p>
-                    <h3 className="text-sm font-semibold text-white truncate px-2">{media.title}</h3>
+                <div className="text-center">
+                    <p className="text-sm md:text-base font-semibold text-white">Now Playing</p>
                 </div>
                 <button onClick={() => setIsQueueVisible(true)} className="text-gray-300 hover:text-white transition-colors rounded-full p-2 bg-black/20 hover:bg-black/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80" aria-label="Show queue">
                   <ListIcon className="w-6 h-6" />
                 </button>
             </header>
 
-            <main ref={mainRef} className="relative z-10 flex flex-col items-center justify-start flex-grow px-4 text-center overflow-y-auto pb-4">
-                <div className="relative w-full max-w-xs md:max-w-md aspect-square mt-8 md:mt-4 flex-shrink-0">
+            {/* Main Content Area - Optimized for landscape */}
+            <div 
+                ref={mainContentRef}
+                className="flex-grow flex flex-col justify-around overflow-y-auto
+                           landscape:flex-row landscape:justify-center landscape:items-center landscape:gap-6 landscape:p-4 landscape:overflow-y-hidden
+                           md:landscape:flex-col md:landscape:justify-around md:landscape:items-stretch md:landscape:gap-0 md:landscape:p-0 md:landscape:overflow-y-auto"
+            >
+                {/* Left/Top: Cover Art */}
+                <div 
+                    className="relative w-full max-w-xs md:max-w-md aspect-square mx-auto mt-4 md:mt-0 flex-shrink-0
+                               landscape:w-auto landscape:h-[55vh] landscape:max-h-[280px] landscape:mt-0 landscape:mx-0
+                               md:landscape:w-full md:landscape:h-auto md:landscape:max-h-none md:landscape:mx-auto md:landscape:aspect-square"
+                >
                     <img 
                       src={media.coverArt} 
                       alt={media.title} 
                       className="w-full h-full rounded-lg object-cover shadow-2xl shadow-black/50" 
                     />
                 </div>
-                <div className="mt-6">
-                    <h2 className="text-2xl md:text-4xl font-bold text-white">{media.title}</h2>
-                    <p className="text-gray-300 text-base md:text-lg mt-1">{media.artist}</p>
-                </div>
-            </main>
-
-            <footer className="relative z-10 flex-shrink-0 p-4 md:p-8 space-y-4 max-w-xl mx-auto w-full">
-                <div className="w-full">
-                    <input
-                        type="range"
-                        min="0"
-                        max={duration || 0}
-                        value={currentTime}
-                        onChange={handleSeekInternal}
-                        className="w-full"
-                        aria-label="Seek slider"
-                    />
-                    <div className="flex justify-between text-xs text-gray-400 mt-1">
-                        <span>{formatTime(currentTime)}</span>
-                        <span>{formatTime(duration)}</span>
+                
+                {/* Right/Bottom: Info & Controls */}
+                <div 
+                    className="p-4 md:p-8 space-y-4 w-full max-w-xl mx-auto flex-shrink-0
+                               landscape:p-0 landscape:w-auto landscape:flex-grow landscape:max-w-md landscape:space-y-3 landscape:flex landscape:flex-col landscape:justify-center
+                               md:landscape:block md:landscape:p-8 md:landscape:w-full md:landscape:flex-grow-0 md:landscape:max-w-xl md:landscape:mx-auto md:landscape:space-y-4"
+                >
+                    
+                    {/* Track Info */}
+                    <div className="text-center md:text-left landscape:text-center md:landscape:text-left">
+                        <Marquee as="h2" text={media.title} className="text-2xl md:text-3xl font-bold text-white" autoPlay />
+                        <Marquee as="p" text={media.artist} className="text-gray-300 text-base md:text-lg mt-1" autoPlay />
                     </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="w-full">
+                        <input
+                          type="range"
+                          min="0"
+                          max={duration || 0}
+                          value={currentTime}
+                          onChange={(e) => onSeek(parseFloat(e.target.value))}
+                          className="w-full"
+                          aria-label="Progress slider"
+                        />
+                        <div className="flex justify-between text-xs text-gray-400 mt-2">
+                            <span>{formatTime(currentTime)}</span>
+                            <span>{formatTime(duration)}</span>
+                        </div>
+                    </div>
+                    
+                    {/* Controls */}
+                    <div className="flex items-center justify-between space-x-1 sm:space-x-2 md:space-x-4">
+                        <button
+                            onClick={() => onToggleLike(media.id)}
+                            className={`p-2 rounded-full transition-colors flex-shrink-0 ${isLiked ? 'text-white' : 'text-gray-400 hover:text-white'} focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80`}
+                            aria-label={isLiked ? "Unlike song" : "Like song"}
+                        >
+                            <HeartIcon filled={isLiked} className="w-6 h-6" />
+                        </button>
+                        <button 
+                            onClick={onShuffleToggle} 
+                            className={`p-2 rounded-full transition-colors ${isShuffling ? 'text-white' : 'text-gray-400 hover:text-white'} focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80`}
+                            aria-label="Shuffle"
+                        >
+                            <ShuffleIcon isActive={isShuffling}/>
+                        </button>
+                        <button onClick={onPrevious} disabled={!isPreviousAvailable} className="text-gray-300 hover:text-white transition-colors p-2 rounded-full disabled:opacity-50 disabled:hover:text-gray-300" aria-label="Previous track">
+                            <SkipPreviousIcon className="w-10 h-10"/>
+                        </button>
+                        <button onClick={onTogglePlayPause} className="bg-white text-black rounded-full w-16 h-16 md:w-20 md:h-20 flex items-center justify-center shadow-lg hover:bg-gray-200 transition-transform hover:scale-105 active:scale-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 focus-visible:ring-white relative" aria-label={isPlaying ? "Pause" : "Play"}>
+                            <span className={`absolute transition-all duration-200 ease-in-out ${isPlaying ? 'opacity-0 scale-50' : 'opacity-100 scale-100'}`} aria-hidden="true"><PlayIcon size={40} /></span>
+                            <span className={`absolute transition-all duration-200 ease-in-out ${isPlaying ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`} aria-hidden="true"><PauseIcon size={40} /></span>
+                        </button>
+                        <button onClick={onNext} disabled={!isNextAvailable} className="text-gray-300 hover:text-white transition-colors p-2 rounded-full disabled:opacity-50 disabled:hover:text-gray-300" aria-label="Next track">
+                            <SkipNextIcon className="w-10 h-10"/>
+                        </button>
+                        <button 
+                            onClick={onRepeatToggle} 
+                            className={`p-2 rounded-full transition-colors ${repeatMode !== 'off' ? 'text-white' : 'text-gray-400 hover:text-white'} focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80`}
+                            aria-label="Repeat"
+                        >
+                            <RepeatIcon mode={repeatMode} />
+                        </button>
+                         <button
+                            onClick={() => setIsAddToPlaylistOpen(true)}
+                            className="p-2 text-gray-400 hover:text-white rounded-full transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                            aria-label="Add to playlist"
+                        >
+                            <PlusIcon className="w-6 h-6" />
+                        </button>
+                    </div>
+                     
+                    {/* Desktop Volume */}
+                    <div className="hidden md:flex items-center justify-center space-x-3 pt-4 landscape:hidden md:landscape:flex">
+                        <button onClick={onToggleMute} className="text-gray-400 hover:text-white transition-colors rounded-full p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"><VolumeIcon /></button>
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.01"
+                            value={isMuted ? 0 : volume}
+                            onChange={handleVolumeChangeInternal}
+                            className="w-28"
+                            aria-label="Volume slider"
+                        />
+                     </div>
                 </div>
-                <div className="flex items-center justify-center space-x-6">
-                    <button 
-                        onClick={onShuffleToggle} 
-                        className={`p-2 rounded-full transition-colors ${isShuffling ? 'text-white' : 'text-gray-400 hover:text-white'} focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80`}
-                        aria-label="Shuffle"
-                    >
-                        <ShuffleIcon isActive={isShuffling}/>
-                    </button>
-                    <button onClick={onPrevious} disabled={!isPreviousAvailable} className="text-gray-300 hover:text-white transition-colors p-2 rounded-full disabled:opacity-50 disabled:hover:text-gray-300" aria-label="Previous track">
-                        <SkipPreviousIcon className="w-10 h-10"/>
-                    </button>
-                    <button onClick={onTogglePlayPause} className="bg-white text-black rounded-full w-16 h-16 md:w-20 md:h-20 flex items-center justify-center shadow-lg hover:bg-gray-200 transition-transform hover:scale-105 active:scale-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 focus-visible:ring-white relative" aria-label={isPlaying ? "Pause" : "Play"}>
-                        <span className={`absolute transition-all duration-200 ease-in-out ${isPlaying ? 'opacity-0 scale-50' : 'opacity-100 scale-100'}`} aria-hidden="true"><PlayIcon size={40} /></span>
-                        <span className={`absolute transition-all duration-200 ease-in-out ${isPlaying ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`} aria-hidden="true"><PauseIcon size={40} /></span>
-                    </button>
-                    <button onClick={onNext} disabled={!isNextAvailable} className="text-gray-300 hover:text-white transition-colors p-2 rounded-full disabled:opacity-50 disabled:hover:text-gray-300" aria-label="Next track">
-                        <SkipNextIcon className="w-10 h-10"/>
-                    </button>
-                    <button 
-                        onClick={onRepeatToggle} 
-                        className={`p-2 rounded-full transition-colors ${repeatMode !== 'off' ? 'text-white' : 'text-gray-400 hover:text-white'} focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80`}
-                        aria-label="Repeat"
-                    >
-                        <RepeatIcon mode={repeatMode} />
-                    </button>
-                </div>
-                 <div className="flex md:hidden items-center justify-center space-x-3 pt-4">
-                    <button onClick={onToggleMute} className="text-gray-400 hover:text-white transition-colors rounded-full p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"><VolumeIcon /></button>
-                    <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={isMuted ? 0 : volume}
-                        onChange={handleVolumeChangeInternal}
-                        className="w-full"
-                        aria-label="Volume slider"
-                    />
-                 </div>
-                 <div className="hidden md:flex items-center justify-center space-x-3 pt-4">
-                    <button onClick={onToggleMute} className="text-gray-400 hover:text-white transition-colors rounded-full p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"><VolumeIcon /></button>
-                    <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={isMuted ? 0 : volume}
-                        onChange={handleVolumeChangeInternal}
-                        className="w-28"
-                        aria-label="Volume slider"
-                    />
-                 </div>
-            </footer>
+            </div>
         </div>
+
+        {isAddToPlaylistOpen && (
+            <AddToPlaylistModal
+                isOpen={isAddToPlaylistOpen}
+                onClose={() => setIsAddToPlaylistOpen(false)}
+                media={media}
+                playlists={playlists}
+                onAddToPlaylist={onAddToPlaylist}
+                onCreatePlaylist={onCreatePlaylist}
+            />
+        )}
 
         {/* Queue Modal */}
         {isQueueVisible && (

@@ -2,6 +2,7 @@ import React from 'react';
 import { MediaItem, Playlist } from '../types';
 import TrashIcon from './icons/TrashIcon';
 import PlusIcon from './icons/PlusIcon';
+import { LIKED_SONGS_PLAYLIST_ID } from '../constants';
 
 interface MediaItemMenuProps {
     item: MediaItem;
@@ -48,7 +49,7 @@ const MediaItemMenu: React.FC<MediaItemMenuProps> = ({
     const isLocalFile = item.src.startsWith('blob:');
     
     const playlistsIn = playlists.filter(p => p.mediaIds.includes(item.id));
-    const playlistsNotIn = playlists.filter(p => !p.mediaIds.includes(item.id));
+    const playlistsNotIn = playlists.filter(p => !p.mediaIds.includes(item.id) && p.id !== LIKED_SONGS_PLAYLIST_ID);
 
     // If we're inside a specific playlist view, simplify the menu but always allow file removal
     if (contextPlaylistId && onRemoveFromPlaylist) {
@@ -144,10 +145,10 @@ const MediaItemMenu: React.FC<MediaItemMenuProps> = ({
                     </>
                 )}
                 
-                {playlists.length === 0 && (
+                {playlists.length <= 1 && playlistsNotIn.length === 0 && (
                      <>
                         <div className="h-px bg-white/10 my-1" />
-                        <p className="px-3 py-2 text-sm text-gray-500">No playlists yet.</p>
+                        <p className="px-3 py-2 text-sm text-gray-500">No other playlists yet.</p>
                      </>
                 )}
             </div>

@@ -3,6 +3,7 @@ import { MediaItem, Playlist } from '../types';
 import PlayIcon from './icons/PlayIcon';
 import MoreVerticalIcon from './icons/MoreVerticalIcon';
 import MediaItemMenu from './MediaItemMenu';
+import Marquee from './Marquee';
 
 interface LibraryListItemProps {
     item: MediaItem;
@@ -55,8 +56,8 @@ const LibraryListItem: React.FC<LibraryListItemProps> = ({ item, onSelect, playl
                     </div>
                 </div>
                 <div className="flex-grow min-w-0">
-                    <h3 className="text-base font-semibold truncate text-gray-200 group-hover:text-white transition-colors">{item.title}</h3>
-                    <p className="text-sm text-gray-400 truncate">{item.artist}</p>
+                    <Marquee as="h3" text={item.title} className="text-base font-semibold text-gray-200 group-hover:text-white transition-colors" />
+                    <Marquee as="p" text={item.artist} className="text-sm text-gray-400" />
                 </div>
             </div>
 

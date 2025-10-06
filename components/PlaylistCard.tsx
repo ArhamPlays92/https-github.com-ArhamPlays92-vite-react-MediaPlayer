@@ -1,8 +1,10 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Playlist, MediaItem } from '../types';
 import MoreVerticalIcon from './icons/MoreVerticalIcon';
 import PlaylistMenu from './PlaylistMenu';
+import Marquee from './Marquee';
 
 interface PlaylistCardProps {
     playlist: Playlist;
@@ -91,7 +93,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, allMedia, onClick
                             className="w-full bg-gray-800 text-base font-semibold text-white rounded px-1 -m-1 focus:outline-none focus:ring-2 focus:ring-white/50"
                         />
                     ) : (
-                        <h3 className="text-base font-semibold truncate text-gray-200 group-hover:text-white">{playlist.name}</h3>
+                        <Marquee as="h3" text={playlist.name} className="text-base font-semibold text-gray-200 group-hover:text-white" />
                     )}
                     <p className="text-sm text-gray-400">{playlist.mediaIds.length} items</p>
                 </div>

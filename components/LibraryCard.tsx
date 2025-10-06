@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MediaItem, Playlist } from '../types';
 import MoreVerticalIcon from './icons/MoreVerticalIcon';
 import MediaItemMenu from './MediaItemMenu';
+import Marquee from './Marquee';
 
 interface LibraryCardProps {
     item: MediaItem;
@@ -55,8 +56,8 @@ const LibraryCard: React.FC<LibraryCardProps> = ({ item, onSelect, playlists, on
                 </div>
                 
                 <div className="pt-4">
-                    <h3 className="text-base font-semibold truncate text-gray-200 group-hover:text-white transition-colors">{item.title}</h3>
-                    <p className="text-sm text-gray-400">{item.artist}</p>
+                    <Marquee as="h3" text={item.title} className="text-base font-semibold text-gray-200 group-hover:text-white transition-colors" />
+                    <Marquee as="p" text={item.artist} className="text-sm text-gray-400" />
                 </div>
             </div>
 

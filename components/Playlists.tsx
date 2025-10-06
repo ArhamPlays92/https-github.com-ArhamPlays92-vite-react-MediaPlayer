@@ -1,11 +1,15 @@
 
 
+
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Playlist, MediaItem, LibraryViewMode } from '../types';
 import Library from './Library';
 import PlusIcon from './icons/PlusIcon';
 import PlaylistCard from './PlaylistCard';
 import ChevronLeftIcon from './icons/ChevronLeftIcon';
+import { LIKED_SONGS_PLAYLIST_ID } from '../constants';
+import Marquee from './Marquee';
 
 interface PlaylistsProps {
   playlists: Playlist[];
@@ -122,8 +126,8 @@ const Playlists: React.FC<PlaylistsProps> = ({
                     </div>
                 )}
             </div>
-            <div className="text-center sm:text-left">
-                 <h1 className="text-3xl md:text-5xl font-bold text-white">{selectedPlaylist.name}</h1>
+            <div className="text-center sm:text-left min-w-0">
+                 <Marquee as="h1" text={selectedPlaylist.name} className="text-3xl md:text-5xl font-bold text-white" />
                  <p className="text-gray-400 mt-2">{playlistMedia.length} items</p>
             </div>
         </div>
@@ -149,21 +153,24 @@ const Playlists: React.FC<PlaylistsProps> = ({
       <h2 className="text-3xl font-bold mb-6 text-gray-200">Playlists</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         <CreatePlaylistCard onCreate={onCreatePlaylist} />
-        {playlists.map(playlist => (
-          <PlaylistCard
-            key={playlist.id}
-            playlist={playlist}
-            allMedia={allMedia}
-            onClick={() => setSelectedPlaylist(playlist)}
-            onDelete={() => onDeletePlaylist(playlist.id)}
-            onRename={(newName: string) => {
-              onRenamePlaylist(playlist.id, newName);
-              setRenamingPlaylistId(null);
-            }}
-            isRenaming={renamingPlaylistId === playlist.id}
-            onSetRenaming={() => setRenamingPlaylistId(playlist.id)}
-          />
-        ))}
+        {playlists.map(playlist => {
+          const isLikedPlaylist = playlist.id === LIKED_SONGS_PLAYLIST_ID;
+          return (
+            <PlaylistCard
+              key={playlist.id}
+              playlist={playlist}
+              allMedia={allMedia}
+              onClick={() => setSelectedPlaylist(playlist)}
+              onDelete={isLikedPlaylist ? undefined : () => onDeletePlaylist(playlist.id)}
+              onRename={isLikedPlaylist ? undefined : (newName: string) => {
+                onRenamePlaylist(playlist.id, newName);
+                setRenamingPlaylistId(null);
+              }}
+              isRenaming={renamingPlaylistId === playlist.id}
+              onSetRenaming={isLikedPlaylist ? undefined : () => setRenamingPlaylistId(playlist.id)}
+            />
+          )
+        })}
       </div>
     </div>
   );

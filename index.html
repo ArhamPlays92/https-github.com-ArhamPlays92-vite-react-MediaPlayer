@@ -45,6 +45,32 @@
     animation: slide-up-fade-in 0.5s ease-out forwards;
   }
 
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .animate-marquee-content {
+      animation: marquee 15s linear infinite;
+      animation-play-state: paused;
+  }
+  /* Default hover-to-play behavior */
+  .animate-marquee-container:not(.autoplay):hover .animate-marquee-content,
+  .animate-marquee-container:not(.autoplay):focus-within .animate-marquee-content {
+      animation-play-state: running;
+  }
+  
+  /* Autoplay behavior with pause on hover */
+  .animate-marquee-container.autoplay .animate-marquee-content {
+      animation-play-state: running;
+  }
+  .animate-marquee-container.autoplay:hover .animate-marquee-content,
+  .animate-marquee-container.autoplay:focus-within .animate-marquee-content {
+      animation-play-state: paused;
+  }
+  .will-change-transform {
+      will-change: transform;
+  }
+
   @keyframes wave {
     0%, 100% { transform: scaleY(0.4); }
     50% { transform: scaleY(1); }

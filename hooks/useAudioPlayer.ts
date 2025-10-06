@@ -274,7 +274,7 @@ export const useAudioPlayer = () => {
   useEffect(() => {
       const audio = audioRef.current;
       if (!audio) return;
-
+      
       const onPlay = () => setIsPlaying(true);
       const onPause = () => setIsPlaying(false);
       const onTimeUpdate = () => setCurrentTime(audio.currentTime);

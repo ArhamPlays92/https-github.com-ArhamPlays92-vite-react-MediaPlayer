@@ -1,6 +1,8 @@
 
 import { MediaItem, MediaType, Playlist } from './types';
 
+export const LIKED_SONGS_PLAYLIST_ID = 0;
+
 export const MEDIA_FILES: MediaItem[] = [
   {
     id: 1,
@@ -59,6 +61,11 @@ export const MEDIA_FILES: MediaItem[] = [
 ];
 
 export const INITIAL_PLAYLISTS: Playlist[] = [
+  {
+    id: LIKED_SONGS_PLAYLIST_ID,
+    name: 'Liked Songs',
+    mediaIds: [],
+  },
   {
     id: 1,
     name: 'Blender Movies',

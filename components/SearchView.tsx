@@ -1,10 +1,12 @@
 
 
+
 import React from 'react';
 import { MediaItem, Playlist, MediaType } from '../types';
 import LibraryListItem from './LibraryListItem';
 import LibraryCard from './LibraryCard';
 import PlaylistCard from './PlaylistCard';
+import Marquee from './Marquee';
 
 interface SearchViewProps {
     searchQuery: string;
@@ -47,7 +49,7 @@ const SearchView: React.FC<SearchViewProps> = ({
 
     return (
         <div>
-            <h2 className="text-3xl font-bold mb-8 text-gray-200">Results for "{searchQuery}"</h2>
+            <Marquee as="h2" text={`Results for "${searchQuery}"`} className="text-3xl font-bold mb-8 text-gray-200" />
 
             {!hasResults && (
                 <p className="text-gray-500">No results found.</p>
