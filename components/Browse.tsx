@@ -305,6 +305,7 @@ const Browse: React.FC<BrowseProps> = ({
         await idb.set('directoryHandle', handle);
         setPermissionState('granted');
         await scanDirectory(handle);
+// FIX: Add type guard for caught exception to safely access error properties.
       } catch (e) {
         if (e instanceof Error) {
             if (e.name === 'AbortError') return;
@@ -390,6 +391,7 @@ const Browse: React.FC<BrowseProps> = ({
             setDirHandle(null);
             await idb.delete('directoryHandle');
         }
+// FIX: Add type guard for caught exception to safely access error properties.
     } catch (e) {
         if (e instanceof Error && e.name === 'AbortError') {
           return;
@@ -489,6 +491,7 @@ const Browse: React.FC<BrowseProps> = ({
 
         await (handle as any).move(newName);
         await scanDirectory(dirHandle!);
+// FIX: Add type guard for caught exception to safely access error properties.
     } catch (e) {
         if (e instanceof Error) {
             console.error("Rename failed:", e);
@@ -524,9 +527,9 @@ const Browse: React.FC<BrowseProps> = ({
                           // Ignore, assume it's a file if getDirectoryHandle fails
                         }
                         await info.parent.removeEntry(info.name, { recursive: isDirectory });
+// FIX: Ensure only strings are passed to setError for type safety.
                     } catch (e) {
                        console.error(`Failed to delete ${path}`, e);
-// FIX: Ensure only strings are passed to setError for type safety.
                        if (e instanceof Error) {
                            setError(`Error deleting ${info.name}: ${e.message}`);
                        } else {
@@ -827,7 +830,7 @@ const Browse: React.FC<BrowseProps> = ({
           </div>
     
            {selectedPaths.size > 0 && isSelectionMode && (
-                <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-30 bg-black/70 backdrop-blur-lg border-t border-gray-800 animate-slide-up-fade-in">
+                <div className="fixed bottom-16 lg:bottom-0 left-0 right-0 z-30 bg-black/70 backdrop-blur-lg border-t border-gray-800 animate-slide-up-fade-in">
                      <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
                          <p className="text-sm font-semibold">{selectedPaths.size} item{selectedPaths.size > 1 ? 's' : ''} selected</p>
                          <div className="flex items-center gap-2 flex-wrap justify-center">

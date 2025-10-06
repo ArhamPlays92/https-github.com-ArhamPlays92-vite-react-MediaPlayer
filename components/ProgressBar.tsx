@@ -7,9 +7,18 @@ interface ProgressBarProps {
     size?: 'normal' | 'small';
 }
 
+const formatTime = (time: number) => {
+    if (isNaN(time)) return '0:00';
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+};
+
 const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek, size = 'normal' }) => {
     const progressBarRef = useRef<HTMLDivElement>(null);
     const [isSeeking, setIsSeeking] = useState(false);
+    const [hoverTime, setHoverTime] = useState<number | null>(null);
+    const [hoverPosition, setHoverPosition] = useState(0);
 
     const getSeekTime = useCallback((e: React.MouseEvent | MouseEvent) => {
         if (!progressBarRef.current || duration === 0) return 0;
@@ -19,6 +28,19 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek
         const newTime = Math.max(0, Math.min(duration, (clickX / width) * duration));
         return newTime;
     }, [duration]);
+
+    const handleMouseMoveOnBar = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!progressBarRef.current || duration === 0) return;
+        const rect = progressBarRef.current.getBoundingClientRect();
+        const hoverX = e.clientX - rect.left;
+        setHoverPosition(hoverX);
+        const time = (hoverX / rect.width) * duration;
+        setHoverTime(time);
+    };
+
+    const handleMouseLeaveBar = () => {
+        setHoverTime(null);
+    };
 
     const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -65,13 +87,15 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek
 
     const thumbClasses = size === 'small'
         ? "absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full transform translate-x-1/2 opacity-100 transition-opacity"
-        : "absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full transform translate-x-1/2 opacity-100 transition-opacity";
+        : `absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full transform translate-x-1/2 ${isSeeking ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`;
 
 
     return (
         <div 
             ref={progressBarRef}
             onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMoveOnBar}
+            onMouseLeave={handleMouseLeaveBar}
             className={containerClasses}
             style={{ touchAction: 'none' }} // Prevent scrolling on mobile
         >
@@ -83,6 +107,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek
                     <div className={thumbClasses} />
                 </div>
             </div>
+            {hoverTime !== null && size !== 'small' && (
+                <div 
+                    className="absolute bottom-full mb-2 transform -translate-x-1/2 bg-black/80 rounded px-2 py-1 text-xs text-white pointer-events-none"
+                    style={{ left: `${hoverPosition}px` }}
+                >
+                    {formatTime(hoverTime)}
+                </div>
+            )}
         </div>
     );
 };

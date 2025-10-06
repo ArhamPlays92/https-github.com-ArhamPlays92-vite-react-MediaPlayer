@@ -432,9 +432,9 @@ function App() {
     return mainContentWrapper(viewContent);
   };
 
-  const mainPaddingBottom = player.audioPlayerState !== 'hidden' 
-    ? 'pb-44 lg:pb-28'
-    : 'pb-24 lg:pb-8';
+  const mainPaddingBottom = player.audioPlayerState === 'minimized'
+    ? 'pb-40 lg:pb-28' // Space for MiniPlayer (h-20) + MobileNav (h-16)
+    : 'pb-24 lg:pb-8'; // Space for just MobileNav
     
   const likedSongIds = playlists.find(p => p.id === LIKED_SONGS_PLAYLIST_ID)?.mediaIds || [];
 

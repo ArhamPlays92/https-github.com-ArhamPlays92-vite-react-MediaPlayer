@@ -47,7 +47,7 @@ const MiniPlayer: React.FC<MiniPlayerProps> = ({
   const isLiked = likedSongIds.includes(media.id);
 
   return (
-    <div className="fixed left-0 right-0 bottom-16 md:bottom-0 h-20 bg-black/50 backdrop-blur-lg border-t border-gray-800 z-40 flex flex-col animate-slide-up-fade-in">
+    <div className="fixed left-0 right-0 bottom-16 lg:bottom-0 h-20 bg-black/50 backdrop-blur-lg border-t border-gray-800 z-40 flex flex-col animate-slide-up-fade-in">
       {/* Progress Bar */}
       <div 
         className="absolute top-0 left-0 right-0 h-auto"
