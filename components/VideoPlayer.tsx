@@ -10,6 +10,7 @@ import FullscreenExitIcon from './icons/FullscreenExitIcon';
 import PictureInPictureIcon from './icons/PictureInPictureIcon';
 import ChevronLeftIcon from './icons/ChevronLeftIcon';
 import Marquee from './Marquee';
+import ProgressBar from './ProgressBar';
 
 interface VideoPlayerProps {
   media: MediaItem;
@@ -84,13 +85,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ media, onBack }) => {
   };
 
   // Seeking
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSeek = useCallback((newTime: number) => {
     if (videoRef.current) {
-      const newTime = parseFloat(e.target.value);
       videoRef.current.currentTime = newTime;
       setCurrentTime(newTime);
     }
-  };
+  }, []);
 
   // Fullscreen
   const toggleFullscreen = useCallback(() => {
@@ -225,14 +225,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ media, onBack }) => {
         <div className={`absolute bottom-0 left-0 right-0 z-20 p-4 md:p-6 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 ${isControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             <div className="flex flex-col space-y-3">
                 <div className="w-full">
-                    <input
-                        type="range"
-                        min="0"
-                        max={duration || 0}
-                        value={currentTime}
-                        onChange={handleSeek}
-                        className="w-full"
-                        aria-label="Seek slider"
+                    <ProgressBar
+                        currentTime={currentTime}
+                        duration={duration}
+                        onSeek={handleSeek}
                     />
                     <div className="flex justify-between text-xs text-gray-400 mt-2">
                         <span>{formatTime(currentTime)}</span>

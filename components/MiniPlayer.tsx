@@ -1,7 +1,6 @@
 
 
-
-import React, { useRef } from 'react';
+import React from 'react';
 import { MediaItem } from '../types';
 import PlayIcon from './icons/PlayIcon';
 import PauseIcon from './icons/PauseIcon';
@@ -10,6 +9,7 @@ import SkipNextIcon from './icons/SkipNextIcon';
 import SkipPreviousIcon from './icons/SkipPreviousIcon';
 import HeartIcon from './icons/HeartIcon';
 import Marquee from './Marquee';
+import ProgressBar from './ProgressBar';
 
 interface MiniPlayerProps {
   media: MediaItem;
@@ -44,34 +44,20 @@ const MiniPlayer: React.FC<MiniPlayerProps> = ({
   onToggleLike,
   likedSongIds
 }) => {
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!progressBarRef.current || duration === 0) return;
-    const rect = progressBarRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    const newTime = (clickX / width) * duration;
-    onSeek(newTime);
-  };
-
   const isLiked = likedSongIds.includes(media.id);
 
   return (
     <div className="fixed left-0 right-0 bottom-16 md:bottom-0 h-20 bg-black/50 backdrop-blur-lg border-t border-gray-800 z-40 flex flex-col animate-slide-up-fade-in">
       {/* Progress Bar */}
       <div 
-        ref={progressBarRef}
-        onClick={handleProgressBarClick} 
-        className="absolute top-0 left-0 h-1 w-full group cursor-pointer"
+        className="absolute top-0 left-0 right-0 h-auto"
       >
-        <div className="bg-white/20 h-full w-full">
-             <div 
-                style={{ width: `${progress}%` }} 
-                className="h-full bg-white transition-all duration-100 ease-linear" 
-            />
-        </div>
+        <ProgressBar
+            currentTime={currentTime}
+            duration={duration}
+            onSeek={onSeek}
+            size="small"
+        />
       </div>
 
       <div className="flex items-center justify-between w-full h-full px-4">

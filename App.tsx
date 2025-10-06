@@ -1,5 +1,4 @@
 
-
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import Header from './components/Header';
 import Library from './components/Library';
@@ -40,7 +39,7 @@ function App() {
   const [activePlaylist, setActivePlaylist] = useState<Playlist | null>(null);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
-  const [audioLibrarySubView, setAudioLibrarySubView] = useState<LibrarySubView>('albums');
+  const [audioLibrarySubView, setAudioLibrarySubView] = useState<LibrarySubView>('all');
   const [videoLibrarySubView, setVideoLibrarySubView] = useState<LibrarySubView>('all');
 
   const [confirmationModal, setConfirmationModal] = useState<ConfirmationState>({

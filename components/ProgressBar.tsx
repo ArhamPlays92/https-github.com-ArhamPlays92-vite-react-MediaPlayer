@@ -4,9 +4,10 @@ interface ProgressBarProps {
     currentTime: number;
     duration: number;
     onSeek: (time: number) => void;
+    size?: 'normal' | 'small';
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek }) => {
+const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek, size = 'normal' }) => {
     const progressBarRef = useRef<HTMLDivElement>(null);
     const [isSeeking, setIsSeeking] = useState(false);
 
@@ -18,11 +19,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek
         const newTime = Math.max(0, Math.min(duration, (clickX / width) * duration));
         return newTime;
     }, [duration]);
-
-    const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        const newTime = getSeekTime(e);
-        onSeek(newTime);
-    }, [getSeekTime, onSeek]);
 
     const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -58,20 +54,33 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek
     }, [isSeeking, handleMouseMove, handleMouseUp]);
 
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+    
+    const containerClasses = size === 'small' 
+        ? "w-full cursor-pointer group py-1" 
+        : "w-full cursor-pointer group py-2";
+
+    const trackClasses = size === 'small'
+        ? "w-full h-1 bg-white/20 rounded-full relative"
+        : "w-full h-1.5 bg-white/20 rounded-full relative";
+
+    const thumbClasses = size === 'small'
+        ? "absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full transform translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+        : "absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full transform translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity";
+
 
     return (
         <div 
             ref={progressBarRef}
             onMouseDown={handleMouseDown}
-            className="w-full h-2 bg-white/20 rounded-full cursor-pointer group py-2" // Add padding for easier grabbing
+            className={containerClasses}
             style={{ touchAction: 'none' }} // Prevent scrolling on mobile
         >
-            <div className="w-full h-1.5 bg-white/20 rounded-full relative">
+            <div className={trackClasses}>
                 <div 
                     style={{ width: `${progress}%` }} 
                     className="h-full bg-white rounded-full relative"
                 >
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full transform translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className={thumbClasses} />
                 </div>
             </div>
         </div>

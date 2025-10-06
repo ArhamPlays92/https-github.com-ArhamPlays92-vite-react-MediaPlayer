@@ -22,6 +22,7 @@ import ChevronLeftIcon from './icons/ChevronLeftIcon';
 import HeartIcon from './icons/HeartIcon';
 import AddToPlaylistModal from './AddToPlaylistModal';
 import Marquee from './Marquee';
+import ProgressBar from './ProgressBar';
 
 interface AudioPlayerProps {
   media: MediaItem;
@@ -230,14 +231,10 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                     
                     {/* Progress Bar */}
                     <div className="w-full">
-                        <input
-                          type="range"
-                          min="0"
-                          max={duration || 0}
-                          value={currentTime}
-                          onChange={(e) => onSeek(parseFloat(e.target.value))}
-                          className="w-full"
-                          aria-label="Progress slider"
+                        <ProgressBar
+                          currentTime={currentTime}
+                          duration={duration}
+                          onSeek={onSeek}
                         />
                         <div className="flex justify-between text-xs text-gray-400 mt-2">
                             <span>{formatTime(currentTime)}</span>
